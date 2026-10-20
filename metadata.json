@@ -1,0 +1,6 @@
+{
+  "name": "Savage Bear",
+  "description": "A brutally honest schedule tracker with a savage bear companion and relentless push notifications until your day is done.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
