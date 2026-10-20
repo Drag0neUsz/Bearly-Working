@@ -213,13 +213,14 @@ class SavageNotificationManager(private val context: Context) {
 
         // Check quiet hours
         if (settings.quietHoursEnabled) {
-            val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-            val start = settings.quietStartHour
-            val end = settings.quietEndHour
-            val isQuiet = if (start > end) {
-                hour >= start || hour < end
+            val cal = Calendar.getInstance()
+            val currentMinutes = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
+            val startMinutes = settings.quietStartHour * 60 + settings.quietStartMinute
+            val endMinutes = settings.quietEndHour * 60 + settings.quietEndMinute
+            val isQuiet = if (startMinutes > endMinutes) {
+                currentMinutes >= startMinutes || currentMinutes < endMinutes
             } else {
-                hour in start until end
+                currentMinutes in startMinutes until endMinutes
             }
             if (isQuiet) {
                 scheduleNextCheck()

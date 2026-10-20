@@ -98,4 +98,8 @@ class ScheduleRepository(
             )
         )
     }
+
+    suspend fun clearUnlockedRoasts() = withContext(Dispatchers.IO) {
+        scheduleDao.clearAllUnlockedRoasts()
+    }
 }

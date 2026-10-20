@@ -283,9 +283,11 @@ class MainActivity : ComponentActivity() {
                                     onSetInterval = { viewModel.setNotificationInterval(it) },
                                     onToggleNotifications = { viewModel.toggleNotifications(it) },
                                     onToggleQuietHours = { viewModel.toggleQuietHours(it) },
-                                    onSetQuietHours = { s, e -> viewModel.setQuietHours(s, e) },
+                                    onSetSleepTime = { h, m -> viewModel.setSleepTime(h, m) },
+                                    onSetWakeTime = { h, m -> viewModel.setWakeTime(h, m) },
                                     onToggleVibration = { viewModel.toggleVibration(it) },
                                     onTestNotification = { viewModel.testPushNotificationNow() },
+                                    onClearRoastsBook = { viewModel.clearRoastsCollectionBook() },
                                     onRequestCalendarPermission = {
                                         calendarLauncher.launch(Manifest.permission.READ_CALENDAR)
                                     },

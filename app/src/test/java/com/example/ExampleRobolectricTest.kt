@@ -63,4 +63,12 @@ class ExampleRobolectricTest {
         assertTrue(pattern[5] in 50..80)
         assertTrue(pattern[7] >= 250)
     }
+
+    @Test
+    fun `settings default to quiet mode ON and 120m poke interval`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val settings = com.example.data.local.SavageSettingsManager(context)
+        assertEquals(120, settings.notificationIntervalMinutes)
+        assertTrue(settings.quietHoursEnabled)
+    }
 }

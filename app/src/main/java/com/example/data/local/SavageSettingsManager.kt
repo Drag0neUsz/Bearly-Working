@@ -8,7 +8,7 @@ class SavageSettingsManager(context: Context) {
         context.getSharedPreferences("savage_bear_settings", Context.MODE_PRIVATE)
 
     var notificationIntervalMinutes: Int
-        get() = prefs.getInt(KEY_INTERVAL, 30)
+        get() = prefs.getInt(KEY_INTERVAL, 120)
         set(value) = prefs.edit().putInt(KEY_INTERVAL, value.coerceAtLeast(1)).apply()
 
     var notificationsEnabled: Boolean
@@ -16,16 +16,24 @@ class SavageSettingsManager(context: Context) {
         set(value) = prefs.edit().putBoolean(KEY_ENABLED, value).apply()
 
     var quietHoursEnabled: Boolean
-        get() = prefs.getBoolean(KEY_QUIET_HOURS, false)
+        get() = prefs.getBoolean(KEY_QUIET_HOURS, true)
         set(value) = prefs.edit().putBoolean(KEY_QUIET_HOURS, value).apply()
 
     var quietStartHour: Int
         get() = prefs.getInt(KEY_QUIET_START, 23) // 11 PM
         set(value) = prefs.edit().putInt(KEY_QUIET_START, value).apply()
 
+    var quietStartMinute: Int
+        get() = prefs.getInt(KEY_QUIET_START_MIN, 0)
+        set(value) = prefs.edit().putInt(KEY_QUIET_START_MIN, value).apply()
+
     var quietEndHour: Int
         get() = prefs.getInt(KEY_QUIET_END, 7) // 7 AM
         set(value) = prefs.edit().putInt(KEY_QUIET_END, value).apply()
+
+    var quietEndMinute: Int
+        get() = prefs.getInt(KEY_QUIET_END_MIN, 0)
+        set(value) = prefs.edit().putInt(KEY_QUIET_END_MIN, value).apply()
 
     var vibrateEnabled: Boolean
         get() = prefs.getBoolean(KEY_VIBRATE, true)
@@ -40,7 +48,9 @@ class SavageSettingsManager(context: Context) {
         private const val KEY_ENABLED = "notifications_enabled"
         private const val KEY_QUIET_HOURS = "quiet_hours_enabled"
         private const val KEY_QUIET_START = "quiet_start_hour"
+        private const val KEY_QUIET_START_MIN = "quiet_start_min"
         private const val KEY_QUIET_END = "quiet_end_hour"
+        private const val KEY_QUIET_END_MIN = "quiet_end_min"
         private const val KEY_VIBRATE = "vibrate_enabled"
         private const val KEY_LAST_ROAST = "last_roast_timestamp"
     }

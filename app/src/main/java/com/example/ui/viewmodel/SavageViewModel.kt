@@ -26,11 +26,13 @@ data class SavageUiState(
     val hasCalendarPermission: Boolean = false,
     val hasNotificationPermission: Boolean = false,
     val isAutoSyncing: Boolean = false,
-    val notificationIntervalMinutes: Int = 30,
+    val notificationIntervalMinutes: Int = 120,
     val notificationsEnabled: Boolean = true,
-    val quietHoursEnabled: Boolean = false,
+    val quietHoursEnabled: Boolean = true,
     val quietStartHour: Int = 23,
+    val quietStartMinute: Int = 0,
     val quietEndHour: Int = 7,
+    val quietEndMinute: Int = 0,
     val vibrateEnabled: Boolean = true,
     val unlockedQuotes: Set<String> = emptySet(),
     val statusMessage: String? = null
@@ -67,7 +69,9 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
             notificationsEnabled = settings.notificationsEnabled,
             quietHoursEnabled = settings.quietHoursEnabled,
             quietStartHour = settings.quietStartHour,
+            quietStartMinute = settings.quietStartMinute,
             quietEndHour = settings.quietEndHour,
+            quietEndMinute = settings.quietEndMinute,
             vibrateEnabled = settings.vibrateEnabled
         )
     )
@@ -229,6 +233,18 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { it.copy(quietHoursEnabled = enabled) }
     }
 
+    fun setSleepTime(hour: Int, minute: Int) {
+        settings.quietStartHour = hour
+        settings.quietStartMinute = minute
+        _uiState.update { it.copy(quietStartHour = hour, quietStartMinute = minute) }
+    }
+
+    fun setWakeTime(hour: Int, minute: Int) {
+        settings.quietEndHour = hour
+        settings.quietEndMinute = minute
+        _uiState.update { it.copy(quietEndHour = hour, quietEndMinute = minute) }
+    }
+
     fun setQuietHours(startHour: Int, endHour: Int) {
         settings.quietStartHour = startHour
         settings.quietEndHour = endHour
@@ -257,6 +273,18 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
             uncompletedCount = if (_uiState.value.pendingCount > 0) _uiState.value.pendingCount else null
         )
         _uiState.update { it.copy(statusMessage = "Fired savage push notification!") }
+    }
+
+    fun clearRoastsCollectionBook() {
+        viewModelScope.launch {
+            repository.clearUnlockedRoasts()
+            _uiState.update {
+                it.copy(
+                    unlockedQuotes = emptySet(),
+                    statusMessage = "Cleared Roast Completion Book. All roasts locked."
+                )
+            }
+        }
     }
 
     fun clearStatusMessage() {

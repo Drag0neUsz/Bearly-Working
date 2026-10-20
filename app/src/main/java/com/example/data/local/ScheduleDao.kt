@@ -53,4 +53,7 @@ interface ScheduleDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM unlocked_roasts WHERE quoteText = :quoteText)")
     suspend fun isRoastUnlocked(quoteText: String): Boolean
+
+    @Query("DELETE FROM unlocked_roasts")
+    suspend fun clearAllUnlockedRoasts()
 }

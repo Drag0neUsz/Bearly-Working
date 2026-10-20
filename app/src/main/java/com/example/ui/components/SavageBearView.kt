@@ -60,7 +60,6 @@ fun SavageBearView(
     var displayedText by remember { mutableStateOf("") }
     var isTyping by remember { mutableStateOf(false) }
     var isBlockedCooldown by remember { mutableStateOf(false) }
-    var cooldownSecondsLeft by remember { mutableIntStateOf(0) }
 
     // Tap tracking for rapid 10 taps secret
     val tapTimestamps = remember { mutableStateListOf<Long>() }
@@ -93,6 +92,11 @@ fun SavageBearView(
     // Fast typewriter effect and post-speech 3s lock if secret triggered
     LaunchedEffect(quote, hasSpoken) {
         if (hasSpoken) {
+            // Disable immediately if secret roast so it cannot be skipped or interrupted
+            if (quote == SavageQuotes.SECRET_RAPID_TAPS_QUOTE) {
+                isBlockedCooldown = true
+            }
+
             isTyping = true
             displayedText = ""
             for (i in 1..quote.length) {
@@ -101,15 +105,11 @@ fun SavageBearView(
             }
             isTyping = false
 
-            // If the quote is the secret "Hey I'm talking stop that you buffoon", lock taps for 3s after finishing talking!
+            // After speech finishes, keep clicking disabled for exactly 3 seconds
             if (quote == SavageQuotes.SECRET_RAPID_TAPS_QUOTE) {
                 isBlockedCooldown = true
-                for (sec in 3 downTo 1) {
-                    cooldownSecondsLeft = sec
-                    delay(1000)
-                }
+                delay(3000)
                 isBlockedCooldown = false
-                cooldownSecondsLeft = 0
             }
         }
     }
@@ -119,11 +119,12 @@ fun SavageBearView(
             val now = System.currentTimeMillis()
             tapTimestamps.add(now)
 
-            // Remove timestamps older than 3 seconds
+            // Keep timestamps within the last 3 seconds
             tapTimestamps.removeAll { now - it > 3000 }
 
             if (tapTimestamps.size >= 10) {
-                // Secret triggered! 10 rapid taps!
+                // Secret triggered! 10 rapid taps: disable clicking IMMEDIATELY!
+                isBlockedCooldown = true
                 tapTimestamps.clear()
                 hasSpoken = true
                 isPoked = true
@@ -194,15 +195,6 @@ fun SavageBearView(
                                     text = "TALKING...",
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp
-                                    ),
-                                    color = ComicAccentRed
-                                )
-                            } else if (isBlockedCooldown) {
-                                Text(
-                                    text = "MUTED (${cooldownSecondsLeft}s)",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Black,
                                         fontSize = 10.sp
                                     ),
                                     color = ComicAccentRed
