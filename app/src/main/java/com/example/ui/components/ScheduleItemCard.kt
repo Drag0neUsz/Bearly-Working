@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
@@ -35,6 +36,7 @@ import java.util.Locale
 fun ScheduleItemCard(
     item: ScheduleItem,
     onToggleCompleted: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -194,18 +196,37 @@ fun ScheduleItemCard(
                 }
             }
 
-            // Sharp Delete Action
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier
-                    .size(48.dp)
-                    .testTag("delete_${item.id}")
+            // Sharp Action Buttons: Edit & Delete
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.DeleteOutline,
-                    contentDescription = "Delete item",
-                    tint = ComicTextMuted
-                )
+                IconButton(
+                    onClick = onEdit,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .testTag("edit_${item.id}")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit item",
+                        tint = ComicInkBlack,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier
+                        .size(44.dp)
+                        .testTag("delete_${item.id}")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = "Delete item",
+                        tint = ComicTextMuted,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }

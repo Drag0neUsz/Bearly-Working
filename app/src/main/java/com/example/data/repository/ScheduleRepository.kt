@@ -41,6 +41,10 @@ class ScheduleRepository(
         scheduleDao.insertItem(item)
     }
 
+    suspend fun updateItem(item: ScheduleItem) = withContext(Dispatchers.IO) {
+        scheduleDao.updateItem(item)
+    }
+
     suspend fun deleteItem(item: ScheduleItem) = withContext(Dispatchers.IO) {
         scheduleDao.deleteItem(item)
     }

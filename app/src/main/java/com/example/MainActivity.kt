@@ -265,6 +265,9 @@ class MainActivity : ComponentActivity() {
                                     onSetFilter = { viewModel.setFilter(it) },
                                     onAddTask = { title, isAllDay, hour, minute ->
                                         viewModel.addQuickTask(title, isAllDay, hour, minute)
+                                    },
+                                    onEditTask = { item, title, isAllDay, hour, minute ->
+                                        viewModel.updateTask(item, title, isAllDay, hour, minute)
                                     }
                                 )
                             }

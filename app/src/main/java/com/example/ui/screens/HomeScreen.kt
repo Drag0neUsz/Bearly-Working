@@ -21,12 +21,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ScheduleItem
+import com.example.ui.components.IosTimeWheelPicker
 import com.example.ui.components.SavageBearView
 import com.example.ui.components.ScheduleItemCard
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.SavageUiState
 import com.example.ui.viewmodel.TaskFilter
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -42,9 +44,11 @@ fun HomeScreen(
     onTriggerSecretRapidTap: () -> Unit,
     onSetFilter: (TaskFilter) -> Unit,
     onAddTask: (title: String, isAllDay: Boolean, hour: Int, minute: Int) -> Unit,
+    onEditTask: (ScheduleItem, String, Boolean, Int, Int) -> Unit = { _, _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
+    var editingItem by remember { mutableStateOf<ScheduleItem?>(null) }
     val todayFormatted = remember {
         SimpleDateFormat("EEEE, MMMM d", Locale.getDefault()).format(Date()).uppercase()
     }
@@ -461,6 +465,7 @@ fun HomeScreen(
                     ScheduleItemCard(
                         item = item,
                         onToggleCompleted = { onToggleCompleted(item) },
+                        onEdit = { editingItem = item },
                         onDelete = { onDeleteItem(item) }
                     )
                 }
@@ -526,40 +531,51 @@ fun HomeScreen(
                     }
 
                     if (!isAllDay) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "TIME: ${String.format("%02d:%02d", selectedHour, selectedMinute)}",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                            color = ComicInkBlack
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Live Time Preview Header
+                        val amPm = if (selectedHour < 12) "AM" else "PM"
+                        val displayH = if (selectedHour == 0) 12 else if (selectedHour > 12) selectedHour - 12 else selectedHour
+                        val liveTimeStr = String.format("%02d:%02d (%d:%02d %s)", selectedHour, selectedMinute, displayH, selectedMinute, amPm)
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Text(
+                                text = "COMMITMENT TIME",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.5.sp
+                                ),
+                                color = ComicInkBlack
+                            )
                             Box(
                                 modifier = Modifier
-                                    .weight(1f)
-                                    .border(width = 1.5.dp, color = ComicInkBlack)
-                                    .background(ComicSurfaceSubtle)
-                                    .clickable { selectedHour = (selectedHour + 1) % 24 }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
+                                    .background(ComicInkBlack)
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
                             ) {
-                                Text("HOUR: $selectedHour", fontWeight = FontWeight.Bold, color = ComicInkBlack)
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .border(width = 1.5.dp, color = ComicInkBlack)
-                                    .background(ComicSurfaceSubtle)
-                                    .clickable { selectedMinute = (selectedMinute + 15) % 60 }
-                                    .padding(vertical = 10.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("MIN: ${String.format("%02d", selectedMinute)}", fontWeight = FontWeight.Bold, color = ComicInkBlack)
+                                Text(
+                                    text = liveTimeStr,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                )
                             }
                         }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Directly scrollable drum wheel picker (iOS alarm style, with slight single vibration per number)
+                        IosTimeWheelPicker(
+                            selectedHour = selectedHour,
+                            selectedMinute = selectedMinute,
+                            onHourChange = { selectedHour = it },
+                            onMinuteChange = { selectedMinute = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            height = 132.dp
+                        )
                     }
                 }
             },
@@ -581,6 +597,149 @@ fun HomeScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
+                    Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                }
+            },
+            containerColor = ComicSurfaceWhite,
+            shape = RectangleShape
+        )
+    }
+
+    // Edit Task Dialog (Sharp Light Mode Frame)
+    editingItem?.let { currentItem ->
+        val initialCal = remember(currentItem) {
+            Calendar.getInstance().apply { timeInMillis = currentItem.startTime }
+        }
+        var editTitle by remember(currentItem) { mutableStateOf(currentItem.title) }
+        var editIsAllDay by remember(currentItem) { mutableStateOf(currentItem.isAllDay) }
+        var editHour by remember(currentItem) { mutableIntStateOf(initialCal.get(Calendar.HOUR_OF_DAY)) }
+        var editMinute by remember(currentItem) { mutableIntStateOf(initialCal.get(Calendar.MINUTE)) }
+
+        AlertDialog(
+            onDismissRequest = { editingItem = null },
+            title = {
+                Text(
+                    text = "EDIT SCHEDULE COMMITMENT",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+                    color = ComicInkBlack
+                )
+            },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = "Modify commitment details. The bear expects results.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ComicTextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = editTitle,
+                        onValueChange = { editTitle = it },
+                        label = { Text("Task or Event Title") },
+                        placeholder = { Text("e.g. Finish client report, Workout") },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = ComicInkBlack,
+                            unfocusedBorderColor = ComicBorderSubtle,
+                            focusedTextColor = ComicInkBlack,
+                            unfocusedTextColor = ComicInkBlack
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("input_edit_task_title")
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = editIsAllDay,
+                            onCheckedChange = { editIsAllDay = it },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = ComicInkBlack,
+                                uncheckedColor = ComicInkBlack
+                            ),
+                            modifier = Modifier.testTag("checkbox_edit_all_day")
+                        )
+                        Text(
+                            text = "ALL-DAY COMMITMENT",
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
+                            color = ComicInkBlack,
+                            modifier = Modifier.clickable { editIsAllDay = !editIsAllDay }
+                        )
+                    }
+
+                    if (!editIsAllDay) {
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Live Time Preview Header
+                        val amPm = if (editHour < 12) "AM" else "PM"
+                        val displayHour12 = when (val h = editHour % 12) {
+                            0 -> 12
+                            else -> h
+                        }
+                        val liveTimeStr = "${String.format("%02d:%02d", editHour, editMinute)} ($displayHour12:${String.format("%02d", editMinute)} $amPm)"
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "COMMITMENT TIME",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
+                                color = ComicInkBlack
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .background(ComicInkBlack)
+                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = liveTimeStr,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // Directly scrollable drum wheel picker (iOS alarm style, with slight single vibration per number)
+                        IosTimeWheelPicker(
+                            selectedHour = editHour,
+                            selectedMinute = editMinute,
+                            onHourChange = { editHour = it },
+                            onMinuteChange = { editMinute = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            height = 132.dp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Box(
+                    modifier = Modifier
+                        .background(ComicInkBlack)
+                        .clickable {
+                            if (editTitle.isNotBlank()) {
+                                onEditTask(currentItem, editTitle, editIsAllDay, editHour, editMinute)
+                                editingItem = null
+                            }
+                        }
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                        .testTag("btn_confirm_edit_task")
+                ) {
+                    Text("SAVE CHANGES", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { editingItem = null }) {
                     Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
                 }
             },

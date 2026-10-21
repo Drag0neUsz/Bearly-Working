@@ -206,6 +206,27 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
+    fun updateTask(item: ScheduleItem, title: String, isAllDay: Boolean, hour: Int, minute: Int) {
+        if (title.isBlank()) return
+        viewModelScope.launch {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = item.startTime
+            cal.set(Calendar.HOUR_OF_DAY, hour)
+            cal.set(Calendar.MINUTE, minute)
+            val startTime = cal.timeInMillis
+            val duration = if (item.endTime > item.startTime) item.endTime - item.startTime else 3600000L
+            val endTime = startTime + duration
+
+            val updated = item.copy(
+                title = title.trim(),
+                isAllDay = isAllDay,
+                startTime = startTime,
+                endTime = endTime
+            )
+            repository.updateItem(updated)
+        }
+    }
+
     fun deleteItem(item: ScheduleItem) {
         viewModelScope.launch {
             repository.deleteItem(item)
