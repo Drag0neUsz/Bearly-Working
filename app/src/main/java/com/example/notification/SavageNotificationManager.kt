@@ -36,7 +36,7 @@ class SavageNotificationManager(private val context: Context) {
 
     companion object {
         const val CHANNEL_ID = "savage_bear_reminders"
-        const val CHANNEL_NAME = "Savage Bear Wakeup Calls"
+        const val CHANNEL_NAME = "Bearly Finished Wakeup Calls"
         const val NOTIFICATION_ID = 1001
         const val ALARM_REQUEST_CODE = 2002
 
@@ -167,9 +167,9 @@ class SavageNotificationManager(private val context: Context) {
         }
 
         val title = if (uncompletedCount != null && uncompletedCount > 0) {
-            "🐻 SAVAGE BEAR ($uncompletedCount TASKS SIT UNFINISHED!)"
+            "🐻 BEARLY FINISHED ($uncompletedCount TASKS SIT UNFINISHED!)"
         } else {
-            "🐻 SAVAGE BEAR"
+            "🐻 BEARLY FINISHED"
         }
 
         val openAppIntent = Intent(context, MainActivity::class.java).apply {

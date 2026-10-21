@@ -19,17 +19,22 @@ class ExampleRobolectricTest {
     fun `read string from context`() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val appName = context.getString(R.string.app_name)
-        assertEquals("Savage Bear", appName)
+        assertEquals("Bearly Finished", appName)
     }
 
     @Test
     fun `savage categories and quotes are non empty`() {
         assertTrue(SavageQuotes.ALL_CATEGORIES.isNotEmpty())
         assertTrue(SavageQuotes.BEAR_POKES_ROASTS.isNotEmpty())
+        assertTrue(SavageQuotes.FINISHED_DAY_POKES_ROASTS.isNotEmpty())
         assertTrue(SavageQuotes.SECRETS_ROASTS.isNotEmpty())
         assertTrue(SavageQuotes.BROKEN_PROMISES_ROASTS.isNotEmpty())
         assertTrue(SavageQuotes.ALL_COMPLETED_PRAISE.isNotEmpty())
         assertTrue(SavageQuotes.IGNORED_PRIORITY_ROASTS.isNotEmpty())
+
+        val finishedDayCategory = SavageQuotes.ALL_CATEGORIES.find { it.id == SavageQuotes.CAT_FINISHED_DAY_POKES }
+        assertNotNull(finishedDayCategory)
+        assertEquals("FINISHED DAY POKES", finishedDayCategory?.title)
 
         val (quote, category) = SavageQuotes.selectContextualPushRoast(emptyList(), 14)
         assertNotNull(quote)
@@ -42,6 +47,12 @@ class ExampleRobolectricTest {
         val pokeQuote = SavageQuotes.getRandomBearPokeRoast()
         assertTrue(SavageQuotes.BEAR_POKES_ROASTS.contains(pokeQuote))
         assertEquals("Hey I'm talking stop that you buffoon", SavageQuotes.SECRET_RAPID_TAPS_QUOTE)
+    }
+
+    @Test
+    fun `finished day poke returns dedicated completed day poke quote`() {
+        val finishedQuote = SavageQuotes.getRandomFinishedDayPokeRoast()
+        assertTrue(SavageQuotes.FINISHED_DAY_POKES_ROASTS.contains(finishedQuote))
     }
 
     @Test

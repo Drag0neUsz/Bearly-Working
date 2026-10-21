@@ -150,19 +150,46 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     /**
-     * Tapping the bear chooses EXCLUSIVELY from the dedicated Bear Pokes category.
+     * Tapping the bear chooses from:
+     * - Dedicated Finished Day Pokes category if all scheduled tasks for today are finished
+     * - Direct Bear Pokes category if tasks are still pending or no tasks scheduled.
      * Custom vibration pattern does NOT fire on in-app tap (only applies to push notifs).
      */
     fun pokeBear() {
-        val quote = SavageQuotes.getRandomBearPokeRoast()
+        val items = _uiState.value.items
+        val isAllFinished = items.isNotEmpty() && items.all { it.isCompleted }
+
+        val (quote, categoryId, categoryTitle) = if (isAllFinished) {
+            Triple(
+                SavageQuotes.getRandomFinishedDayPokeRoast(),
+                SavageQuotes.CAT_FINISHED_DAY_POKES,
+                "FINISHED DAY POKES"
+            )
+        } else {
+            Triple(
+                SavageQuotes.getRandomBearPokeRoast(),
+                SavageQuotes.CAT_BEAR_POKES,
+                "BEAR POKES & CALLOUTS"
+            )
+        }
+
         viewModelScope.launch {
-            repository.unlockRoast(quote, SavageQuotes.CAT_BEAR_POKES)
+            repository.unlockRoast(quote, categoryId)
         }
 
         _uiState.update {
             it.copy(
                 bearQuote = quote,
-                bearQuoteCategory = "BEAR POKES & CALLOUTS"
+                bearQuoteCategory = categoryTitle
+            )
+        }
+    }
+
+    fun setBearQuote(quote: String, categoryTitle: String = "PREVIEW") {
+        _uiState.update {
+            it.copy(
+                bearQuote = quote,
+                bearQuoteCategory = categoryTitle
             )
         }
     }

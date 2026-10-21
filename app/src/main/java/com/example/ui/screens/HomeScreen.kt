@@ -98,7 +98,7 @@ fun HomeScreen(
                     ) {
                         Column {
                             Text(
-                                text = "SAVAGE BEAR",
+                                text = "BEARLY FINISHED",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.5.sp,

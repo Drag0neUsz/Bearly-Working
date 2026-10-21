@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Savage Bear"
+rootProject.name = "Bearly Finished"
 
 include(":app")

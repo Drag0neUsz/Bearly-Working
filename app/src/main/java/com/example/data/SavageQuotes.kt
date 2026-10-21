@@ -19,11 +19,12 @@ object SavageQuotes {
     const val CAT_MORNING_SLACKING = "MORNING_SLACKING"
     const val CAT_ALL_COMPLETED = "ALL_COMPLETED"
     const val CAT_BEAR_POKES = "BEAR_POKES"
+    const val CAT_FINISHED_DAY_POKES = "FINISHED_DAY_POKES"
     const val CAT_SECRETS = "SECRETS"
 
     const val SECRET_RAPID_TAPS_QUOTE = "Hey I'm talking stop that you buffoon"
 
-    // --- Category 1: Direct Bear Pokes (EXCLUSIVELY chosen when the bear is tapped) ---
+    // --- Category 1: Direct Bear Pokes (Exclusively chosen when bear is tapped with tasks pending) ---
     val BEAR_POKES_ROASTS = listOf(
         "Why are you poking me? Go poke your to-do list instead.",
         "Tapping my head won't magically finish your tasks, you know.",
@@ -35,6 +36,24 @@ object SavageQuotes {
         "Stop tapping and start doing. Nobody is impressed by your finger cardio.",
         "I swear, watching you avoid your responsibilities is like watching a slow-motion train wreck.",
         "Are you hoping I'll tell you it's okay to slack off? It's not. Move."
+    )
+
+    // --- Category 1b: Finished Day Pokes (Exclusively chosen when poking after 100% completion) ---
+    val FINISHED_DAY_POKES_ROASTS = listOf(
+        "You finished everything. What do you want, a medal? Go outside and touch grass.",
+        "You're done with your tasks, so now you're here bothering me? Find a hobby.",
+        "Yes, you completed your list. No, I am not giving you a high five. Move along.",
+        "Look at Mr. Productive over here poking me just to gloat. Truly sickening.",
+        "Congratulations, you did the bare minimum expected of an adult today. Now stop tapping me.",
+        "Tasks: 100%. Social life: still 0%. Why are you still on this app?",
+        "You beat your schedule, but you still can't beat your addiction to tapping this screen.",
+        "Stop poking me. I have nothing left to yell at you for, and it's making me deeply uncomfortable.",
+        "Go read a book or do something useful. Bothering a finished bear won't earn you extra credit.",
+        "Okay, you won today. Savor it, because tomorrow I'm roasting you twice as hard.",
+        "Why are you still poking me? Go relax, you smug overachiever.",
+        "You did everything on your schedule and your first instinct is to come poke me? Weird flex.",
+        "Are you expecting fireworks? You did your work. That's literally what you were supposed to do.",
+        "I'm off the clock. Go annoy someone else with your newfound productivity."
     )
 
     // --- Category 2: Secrets (Only revealed in tiles after discovering) ---
@@ -105,8 +124,14 @@ object SavageQuotes {
         RoastCategory(
             id = CAT_BEAR_POKES,
             title = "BEAR POKES & CALLOUTS",
-            description = "Special roasts triggered exclusively when you tap the bear companion.",
+            description = "Special roasts triggered exclusively when you tap the bear companion during an active schedule.",
             quotes = BEAR_POKES_ROASTS
+        ),
+        RoastCategory(
+            id = CAT_FINISHED_DAY_POKES,
+            title = "FINISHED DAY POKES",
+            description = "Special roasts triggered when poking the companion after finishing all tasks for the day.",
+            quotes = FINISHED_DAY_POKES_ROASTS
         ),
         RoastCategory(
             id = CAT_IGNORED_PRIORITY,
@@ -156,10 +181,17 @@ object SavageQuotes {
     val TOTAL_QUOTES_COUNT = ALL_CATEGORIES.sumOf { it.quotes.size }
 
     /**
-     * Pick a random direct poke roast when the bear is clicked.
+     * Pick a random direct poke roast when the bear is clicked with tasks pending.
      */
     fun getRandomBearPokeRoast(): String {
         return BEAR_POKES_ROASTS.random()
+    }
+
+    /**
+     * Pick a random poke roast when the bear is clicked after finishing all tasks for the day.
+     */
+    fun getRandomFinishedDayPokeRoast(): String {
+        return FINISHED_DAY_POKES_ROASTS.random()
     }
 
     /**

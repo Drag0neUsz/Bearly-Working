@@ -177,6 +177,7 @@ fun SavageBearView(
                             Text(
                                 text = when {
                                     quote == SavageQuotes.SECRET_RAPID_TAPS_QUOTE -> "BEAR [🔥 SECRET TRIGGERED: ENRAGED]"
+                                    quote in SavageQuotes.FINISHED_DAY_POKES_ROASTS -> "BEAR [SMUG GLOATING DETECTED]"
                                     mood == BearMood.PROUD -> "BEAR [SHOCKED RESPECT]"
                                     mood == BearMood.FURIOUS -> "BEAR [UNFILTERED RAGE]"
                                     mood == BearMood.SUSPICIOUS -> "BEAR [EXTREMELY SKEPTICAL]"
@@ -260,7 +261,7 @@ fun SavageBearView(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "👉 TAP THE BEAR TO GET HIS UNFILTERED THOUGHTS",
+                    text = if (completedRatio >= 1.0f) "👉 POKE THE BEAR TO GLOAT ABOUT FINISHING TODAY" else "👉 TAP THE BEAR TO GET HIS UNFILTERED THOUGHTS",
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Black,
                         letterSpacing = 0.5.sp

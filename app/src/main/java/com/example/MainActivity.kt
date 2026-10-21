@@ -275,7 +275,7 @@ class MainActivity : ComponentActivity() {
                                 QuotesScreen(
                                     uiState = uiState,
                                     onPreviewQuote = { quote ->
-                                        viewModel.pokeBear()
+                                        viewModel.setBearQuote(quote)
                                         currentTab = MainDestination.SCHEDULE
                                     }
                                 )
