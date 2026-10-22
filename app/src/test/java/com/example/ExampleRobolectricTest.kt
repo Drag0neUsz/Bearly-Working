@@ -82,4 +82,15 @@ class ExampleRobolectricTest {
         assertEquals(120, settings.notificationIntervalMinutes)
         assertTrue(settings.quietHoursEnabled)
     }
+
+    @Test
+    fun `main destination contains four pages including calendar`() {
+        val destinations = MainDestination.values()
+        assertEquals(4, destinations.size)
+        assertTrue(destinations.contains(MainDestination.SCHEDULE))
+        assertTrue(destinations.contains(MainDestination.CALENDAR))
+        assertTrue(destinations.contains(MainDestination.ROASTS))
+        assertTrue(destinations.contains(MainDestination.SETTINGS))
+        assertEquals("CALENDAR", MainDestination.CALENDAR.title)
+    }
 }

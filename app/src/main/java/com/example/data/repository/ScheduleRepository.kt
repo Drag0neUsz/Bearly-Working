@@ -28,6 +28,17 @@ class ScheduleRepository(
         return scheduleDao.getItemsForDateFlow(dateString)
     }
 
+    fun getAllItemsFlow(): Flow<List<ScheduleItem>> {
+        return scheduleDao.getAllItemsFlow()
+    }
+
+    suspend fun syncCalendarForDateString(dateString: String): Int = withContext(Dispatchers.IO) {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val date = dateFormat.parse(dateString) ?: Date()
+        val cal = Calendar.getInstance().apply { time = date }
+        syncCalendarForDate(cal)
+    }
+
     suspend fun getItemsForDate(dateString: String): List<ScheduleItem> = withContext(Dispatchers.IO) {
         scheduleDao.getItemsForDate(dateString)
     }

@@ -20,6 +20,8 @@ enum class TaskFilter {
 
 data class SavageUiState(
     val items: List<ScheduleItem> = emptyList(),
+    val allItems: List<ScheduleItem> = emptyList(),
+    val selectedCalendarDate: String = "",
     val filter: TaskFilter = TaskFilter.ALL,
     val bearQuote: String = "Tap my head. Let's see what promises you've broken today.",
     val bearQuoteCategory: String = "READY TO ROAST",
@@ -43,6 +45,9 @@ data class SavageUiState(
     val completionRatio: Float
         get() = if (totalCount == 0) 0f else completedCount.toFloat() / totalCount
 
+    val calendarSelectedItems: List<ScheduleItem>
+        get() = allItems.filter { it.dateString == selectedCalendarDate }
+
     val totalRoastsCount: Int get() = SavageQuotes.TOTAL_QUOTES_COUNT
     val unlockedRoastsCount: Int get() = unlockedQuotes.size
     val completionBookPercent: Int
@@ -65,6 +70,7 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
     private val _uiState = MutableStateFlow(
         SavageUiState(
             hasCalendarPermission = repository.hasCalendarPermission(),
+            selectedCalendarDate = repository.getTodayDateString(),
             notificationIntervalMinutes = settings.notificationIntervalMinutes,
             notificationsEnabled = settings.notificationsEnabled,
             quietHoursEnabled = settings.quietHoursEnabled,
@@ -88,6 +94,14 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
             repository.getItemsForDateFlow(todayStr).collect { items ->
                 _uiState.update { current ->
                     current.copy(items = items)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            repository.getAllItemsFlow().collect { allItems ->
+                _uiState.update { current ->
+                    current.copy(allItems = allItems)
                 }
             }
         }
@@ -230,6 +244,55 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
                 dateString = repository.getTodayDateString()
             )
             repository.addItem(item)
+        }
+    }
+
+    fun selectCalendarDate(dateString: String) {
+        _uiState.update { it.copy(selectedCalendarDate = dateString) }
+    }
+
+    fun addTaskForDate(dateString: String, title: String, isAllDay: Boolean = false, hour: Int = 12, minute: Int = 0) {
+        if (title.isBlank()) return
+        viewModelScope.launch {
+            val cal = Calendar.getInstance()
+            try {
+                val parts = dateString.split("-")
+                if (parts.size == 3) {
+                    cal.set(Calendar.YEAR, parts[0].toInt())
+                    cal.set(Calendar.MONTH, parts[1].toInt() - 1)
+                    cal.set(Calendar.DAY_OF_MONTH, parts[2].toInt())
+                }
+            } catch (e: Exception) {
+                // fallback to current calendar date
+            }
+            cal.set(Calendar.HOUR_OF_DAY, hour)
+            cal.set(Calendar.MINUTE, minute)
+            cal.set(Calendar.SECOND, 0)
+            val startTime = cal.timeInMillis
+            val endTime = startTime + 3600000
+
+            val item = ScheduleItem(
+                title = title.trim(),
+                startTime = startTime,
+                endTime = endTime,
+                isAllDay = isAllDay,
+                source = ScheduleItem.SOURCE_MANUAL,
+                dateString = dateString
+            )
+            repository.addItem(item)
+        }
+    }
+
+    fun syncCalendarForDate(dateString: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isAutoSyncing = true) }
+            val count = repository.syncCalendarForDateString(dateString)
+            _uiState.update {
+                it.copy(
+                    isAutoSyncing = false,
+                    statusMessage = if (count > 0) "Synced $count event(s) from device calendar." else "No new events found for $dateString."
+                )
+            }
         }
     }
 

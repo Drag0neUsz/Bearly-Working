@@ -17,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import com.example.data.SavageQuotes
 import com.example.ui.theme.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlin.random.Random
 
 enum class BearMood {
     SAVAGE,
@@ -72,22 +75,49 @@ fun SavageBearView(
         label = "bearTapBounce"
     )
 
-    // Cubic interpolation talking bounce that syncs with letters appearing
-    val infiniteTransition = rememberInfiniteTransition(label = "talkingTransition")
-    val talkingScale by infiniteTransition.animateFloat(
-        initialValue = 0.97f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 110,
-                easing = CubicBezierEasing(0.34f, 1.56f, 0.64f, 1f)
-            ),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "talkingScaleAnim"
-    )
+    // Dynamic talking animation with randomized scaling parameters and subtle organic tilt
+    val dynamicTalkingScale = remember { Animatable(1f) }
+    val talkingTilt = remember { Animatable(0f) }
 
-    val currentScale = if (isTyping) talkingScale * tapBounce else tapBounce
+    LaunchedEffect(isTyping) {
+        if (isTyping) {
+            while (isActive) {
+                // Randomize peak scale within reasonable range (1.025f to 1.08f)
+                val peakScale = Random.nextFloat() * (1.08f - 1.025f) + 1.025f
+                // Randomize dip scale within reasonable range (0.945f to 0.98f)
+                val dipScale = Random.nextFloat() * (0.98f - 0.945f) + 0.945f
+                // Randomize syllable bounce durations (70ms to 130ms)
+                val upDuration = Random.nextInt(70, 130)
+                val downDuration = Random.nextInt(70, 130)
+                // Random subtle tilt (-1.8f to +1.8f degrees)
+                val tilt = (Random.nextFloat() - 0.5f) * 3.6f
+
+                dynamicTalkingScale.animateTo(
+                    targetValue = peakScale,
+                    animationSpec = tween(
+                        durationMillis = upDuration,
+                        easing = CubicBezierEasing(0.34f, 1.56f, 0.64f, 1f)
+                    )
+                )
+                talkingTilt.animateTo(
+                    targetValue = tilt,
+                    animationSpec = tween(durationMillis = upDuration)
+                )
+                dynamicTalkingScale.animateTo(
+                    targetValue = dipScale,
+                    animationSpec = tween(
+                        durationMillis = downDuration,
+                        easing = FastOutLinearInEasing
+                    )
+                )
+            }
+        } else {
+            dynamicTalkingScale.animateTo(1f, tween(100))
+            talkingTilt.animateTo(0f, tween(100))
+        }
+    }
+
+    val currentScale = (if (isTyping) dynamicTalkingScale.value else 1f) * tapBounce
 
     // Fast typewriter effect and post-speech 3s lock if secret triggered
     LaunchedEffect(quote, hasSpoken) {
@@ -277,6 +307,7 @@ fun SavageBearView(
             modifier = Modifier
                 .size(130.dp)
                 .scale(currentScale)
+                .rotate(if (isTyping) talkingTilt.value else 0f)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null

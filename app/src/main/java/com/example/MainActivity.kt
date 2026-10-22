@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.Today
+import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.ui.screens.CalendarScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.QuotesScreen
 import com.example.ui.screens.SettingsScreen
@@ -43,6 +46,7 @@ import com.example.ui.viewmodel.SavageViewModel
 
 enum class MainDestination(val title: String) {
     SCHEDULE("SCHEDULE"),
+    CALENDAR("CALENDAR"),
     ROASTS("ROASTS"),
     SETTINGS("SETTINGS")
 }
@@ -138,29 +142,29 @@ class MainActivity : ComponentActivity() {
                                 .testTag("bottom_nav_bar")
                         ) {
                             Row(modifier = Modifier.fillMaxWidth()) {
-                                // Tab 1: SCHEDULE
+                                // Tab 1: SCHEDULE (TODAY)
                                 val isSched = currentTab == MainDestination.SCHEDULE
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .background(if (isSched) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.SCHEDULE }
-                                        .padding(vertical = 12.dp)
+                                        .padding(vertical = 10.dp)
                                         .testTag("nav_schedule"),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                         Icon(
-                                            imageVector = if (isSched) Icons.Filled.CalendarMonth else Icons.Outlined.CalendarMonth,
-                                            contentDescription = "Schedule",
+                                            imageVector = if (isSched) Icons.Filled.Today else Icons.Outlined.Today,
+                                            contentDescription = "Today Schedule",
                                             tint = if (isSched) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(22.dp)
+                                            modifier = Modifier.size(20.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
-                                            text = "SCHEDULE",
+                                            text = "TODAY",
                                             fontWeight = FontWeight.Black,
-                                            fontSize = 11.sp,
+                                            fontSize = 10.sp,
                                             color = if (isSched) Color.White else ComicInkBlack
                                         )
                                     }
@@ -170,18 +174,54 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .width(2.dp)
-                                        .height(56.dp)
+                                        .height(52.dp)
                                         .background(ComicInkBlack)
                                 )
 
-                                // Tab 2: ROASTS
+                                // Tab 2: CALENDAR
+                                val isCalendar = currentTab == MainDestination.CALENDAR
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .background(if (isCalendar) ComicInkBlack else ComicSurfaceWhite)
+                                        .clickable { currentTab = MainDestination.CALENDAR }
+                                        .padding(vertical = 10.dp)
+                                        .testTag("nav_calendar"),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Icon(
+                                            imageVector = if (isCalendar) Icons.Filled.CalendarMonth else Icons.Outlined.CalendarMonth,
+                                            contentDescription = "Calendar",
+                                            tint = if (isCalendar) Color.White else ComicInkBlack,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(
+                                            text = "CALENDAR",
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 10.sp,
+                                            color = if (isCalendar) Color.White else ComicInkBlack
+                                        )
+                                    }
+                                }
+
+                                // Tab Divider
+                                Box(
+                                    modifier = Modifier
+                                        .width(2.dp)
+                                        .height(52.dp)
+                                        .background(ComicInkBlack)
+                                )
+
+                                // Tab 3: ROASTS
                                 val isRoasts = currentTab == MainDestination.ROASTS
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .background(if (isRoasts) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.ROASTS }
-                                        .padding(vertical = 12.dp)
+                                        .padding(vertical = 10.dp)
                                         .testTag("nav_roasts"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -190,13 +230,13 @@ class MainActivity : ComponentActivity() {
                                             imageVector = if (isRoasts) Icons.Filled.FormatQuote else Icons.Outlined.FormatQuote,
                                             contentDescription = "Roasts",
                                             tint = if (isRoasts) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(22.dp)
+                                            modifier = Modifier.size(20.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "ROASTS",
                                             fontWeight = FontWeight.Black,
-                                            fontSize = 11.sp,
+                                            fontSize = 10.sp,
                                             color = if (isRoasts) Color.White else ComicInkBlack
                                         )
                                     }
@@ -206,18 +246,18 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .width(2.dp)
-                                        .height(56.dp)
+                                        .height(52.dp)
                                         .background(ComicInkBlack)
                                 )
 
-                                // Tab 3: SETTINGS
+                                // Tab 4: SETTINGS
                                 val isSettings = currentTab == MainDestination.SETTINGS
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
                                         .background(if (isSettings) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.SETTINGS }
-                                        .padding(vertical = 12.dp)
+                                        .padding(vertical = 10.dp)
                                         .testTag("nav_settings"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -226,13 +266,13 @@ class MainActivity : ComponentActivity() {
                                             imageVector = if (isSettings) Icons.Filled.Settings else Icons.Outlined.Settings,
                                             contentDescription = "Settings",
                                             tint = if (isSettings) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(22.dp)
+                                            modifier = Modifier.size(20.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
                                             text = "SETTINGS",
                                             fontWeight = FontWeight.Black,
-                                            fontSize = 11.sp,
+                                            fontSize = 10.sp,
                                             color = if (isSettings) Color.White else ComicInkBlack
                                         )
                                     }
@@ -269,6 +309,21 @@ class MainActivity : ComponentActivity() {
                                     onEditTask = { item, title, isAllDay, hour, minute ->
                                         viewModel.updateTask(item, title, isAllDay, hour, minute)
                                     }
+                                )
+                            }
+                            MainDestination.CALENDAR -> {
+                                CalendarScreen(
+                                    uiState = uiState,
+                                    onSelectDate = { viewModel.selectCalendarDate(it) },
+                                    onToggleCompleted = { viewModel.toggleCompletion(it) },
+                                    onDeleteItem = { viewModel.deleteItem(it) },
+                                    onAddTaskForDate = { dateStr, title, isAllDay, hour, minute ->
+                                        viewModel.addTaskForDate(dateStr, title, isAllDay, hour, minute)
+                                    },
+                                    onEditTask = { item, title, isAllDay, hour, minute ->
+                                        viewModel.updateTask(item, title, isAllDay, hour, minute)
+                                    },
+                                    onSyncCalendarForDate = { viewModel.syncCalendarForDate(it) }
                                 )
                             }
                             MainDestination.ROASTS -> {

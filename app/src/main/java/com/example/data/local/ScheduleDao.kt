@@ -11,6 +11,9 @@ interface ScheduleDao {
     @Query("SELECT * FROM schedule_items WHERE dateString = :dateString ORDER BY isAllDay DESC, startTime ASC")
     fun getItemsForDateFlow(dateString: String): Flow<List<ScheduleItem>>
 
+    @Query("SELECT * FROM schedule_items ORDER BY isAllDay DESC, startTime ASC")
+    fun getAllItemsFlow(): Flow<List<ScheduleItem>>
+
     @Query("SELECT * FROM schedule_items WHERE dateString = :dateString ORDER BY isAllDay DESC, startTime ASC")
     suspend fun getItemsForDate(dateString: String): List<ScheduleItem>
 
