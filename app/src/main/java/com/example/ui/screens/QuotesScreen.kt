@@ -44,7 +44,8 @@ fun QuotesScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = ComicWhiteBg
+        containerColor = ComicWhiteBg,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         Crossfade(
             targetState = selectedCategory,
@@ -104,7 +105,7 @@ private fun CategoryTilesView(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp)
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
         // Header Frame
         item {
@@ -113,7 +114,7 @@ private fun CategoryTilesView(
                     .fillMaxWidth()
                     .background(ComicSurfaceWhite)
                     .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(16.dp)
+                    .padding(12.dp)
                     .testTag("card_completion_book_header")
             ) {
                 Column {
@@ -312,7 +313,7 @@ private fun CategorySubpageView(
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 88.dp)
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         // Navigation Back Bar
         item {
@@ -322,7 +323,7 @@ private fun CategorySubpageView(
                     .background(ComicSurfaceWhite)
                     .border(width = 2.dp, color = ComicInkBlack)
                     .clickable { onBack() }
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .testTag("btn_back_to_tiles")
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {

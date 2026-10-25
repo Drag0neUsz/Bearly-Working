@@ -134,10 +134,11 @@ fun CalendarScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = ComicWhiteBg,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(52.dp)
                     .background(ComicInkBlack, shape = RectangleShape)
                     .border(width = 2.dp, color = ComicInkBlack, shape = RectangleShape)
                     .clickable { showAddDialog = true }
@@ -148,7 +149,7 @@ fun CalendarScreen(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Commitment For Date",
                     tint = Color.White,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
@@ -157,7 +158,7 @@ fun CalendarScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 88.dp)
+            contentPadding = PaddingValues(bottom = 68.dp)
         ) {
             // Header Frame
             item {
@@ -166,7 +167,7 @@ fun CalendarScreen(
                         .fillMaxWidth()
                         .background(ComicSurfaceWhite)
                         .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                         .testTag("header_calendar_page")
                 ) {
                     Row(

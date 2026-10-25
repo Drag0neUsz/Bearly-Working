@@ -56,11 +56,12 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = ComicWhiteBg,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
             // Sharp rectangular Action Button
             Box(
                 modifier = Modifier
-                    .size(56.dp)
+                    .size(52.dp)
                     .background(ComicInkBlack, shape = RectangleShape)
                     .border(width = 2.dp, color = ComicInkBlack, shape = RectangleShape)
                     .clickable { showAddDialog = true }
@@ -71,7 +72,7 @@ fun HomeScreen(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Schedule Item",
                     tint = Color.White,
-                    modifier = Modifier.size(30.dp)
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
@@ -80,7 +81,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 88.dp)
+            contentPadding = PaddingValues(bottom = 68.dp)
         ) {
             // Top Bar Frame (Clean, automatic sync in background, NO manual sync button!)
             item {
@@ -89,7 +90,7 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .background(ComicSurfaceWhite)
                         .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -102,7 +103,7 @@ fun HomeScreen(
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.5.sp,
-                                    fontSize = 22.sp
+                                    fontSize = 20.sp
                                 ),
                                 color = ComicInkBlack
                             )

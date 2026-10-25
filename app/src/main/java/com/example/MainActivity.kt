@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -57,7 +58,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(
+                android.graphics.Color.TRANSPARENT,
+                android.graphics.Color.TRANSPARENT
+            )
+        )
 
         setContent {
             SavageBearTheme {
@@ -129,10 +136,20 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     containerColor = ComicWhiteBg,
-                    contentWindowInsets = WindowInsets.safeDrawing,
+                    contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
+                    topBar = {
+                        // Modular dark status bar strip that automatically fits any device's status bar / cutout height
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(ComicInkBlack)
+                                .windowInsetsTopHeight(WindowInsets.statusBars)
+                                .testTag("status_bar_dark_strip")
+                        )
+                    },
                     bottomBar = {
-                        // Sharp Full-Width Comic Bottom Navigation Bar
+                        // Sharp Full-Width Compact Comic Bottom Navigation Bar
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -149,7 +166,7 @@ class MainActivity : ComponentActivity() {
                                         .weight(1f)
                                         .background(if (isSched) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.SCHEDULE }
-                                        .padding(vertical = 10.dp)
+                                        .padding(vertical = 8.dp)
                                         .testTag("nav_schedule"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -158,7 +175,7 @@ class MainActivity : ComponentActivity() {
                                             imageVector = if (isSched) Icons.Filled.Today else Icons.Outlined.Today,
                                             contentDescription = "Today Schedule",
                                             tint = if (isSched) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(19.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
@@ -174,7 +191,7 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .width(2.dp)
-                                        .height(52.dp)
+                                        .height(46.dp)
                                         .background(ComicInkBlack)
                                 )
 
@@ -185,7 +202,7 @@ class MainActivity : ComponentActivity() {
                                         .weight(1f)
                                         .background(if (isCalendar) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.CALENDAR }
-                                        .padding(vertical = 10.dp)
+                                        .padding(vertical = 8.dp)
                                         .testTag("nav_calendar"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -194,7 +211,7 @@ class MainActivity : ComponentActivity() {
                                             imageVector = if (isCalendar) Icons.Filled.CalendarMonth else Icons.Outlined.CalendarMonth,
                                             contentDescription = "Calendar",
                                             tint = if (isCalendar) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(19.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
@@ -210,7 +227,7 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .width(2.dp)
-                                        .height(52.dp)
+                                        .height(46.dp)
                                         .background(ComicInkBlack)
                                 )
 
@@ -221,7 +238,7 @@ class MainActivity : ComponentActivity() {
                                         .weight(1f)
                                         .background(if (isRoasts) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.ROASTS }
-                                        .padding(vertical = 10.dp)
+                                        .padding(vertical = 8.dp)
                                         .testTag("nav_roasts"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -230,7 +247,7 @@ class MainActivity : ComponentActivity() {
                                             imageVector = if (isRoasts) Icons.Filled.FormatQuote else Icons.Outlined.FormatQuote,
                                             contentDescription = "Roasts",
                                             tint = if (isRoasts) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(19.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
@@ -246,7 +263,7 @@ class MainActivity : ComponentActivity() {
                                 Box(
                                     modifier = Modifier
                                         .width(2.dp)
-                                        .height(52.dp)
+                                        .height(46.dp)
                                         .background(ComicInkBlack)
                                 )
 
@@ -257,7 +274,7 @@ class MainActivity : ComponentActivity() {
                                         .weight(1f)
                                         .background(if (isSettings) ComicInkBlack else ComicSurfaceWhite)
                                         .clickable { currentTab = MainDestination.SETTINGS }
-                                        .padding(vertical = 10.dp)
+                                        .padding(vertical = 8.dp)
                                         .testTag("nav_settings"),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -266,7 +283,7 @@ class MainActivity : ComponentActivity() {
                                             imageVector = if (isSettings) Icons.Filled.Settings else Icons.Outlined.Settings,
                                             contentDescription = "Settings",
                                             tint = if (isSettings) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(19.dp)
                                         )
                                         Spacer(modifier = Modifier.height(2.dp))
                                         Text(
@@ -284,7 +301,9 @@ class MainActivity : ComponentActivity() {
                     Crossfade(
                         targetState = currentTab,
                         label = "screenTransition",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .consumeWindowInsets(innerPadding)
                     ) { destination ->
                         when (destination) {
                             MainDestination.SCHEDULE -> {

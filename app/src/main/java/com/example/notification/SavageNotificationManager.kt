@@ -152,6 +152,14 @@ class SavageNotificationManager(private val context: Context) {
         }
     }
 
+    fun dismissActiveNotification() {
+        try {
+            NotificationManagerCompat.from(context).cancel(NOTIFICATION_ID)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     /**
      * Send an unhinged push notification calling out the user.
      */
@@ -206,7 +214,7 @@ class SavageNotificationManager(private val context: Context) {
     }
 
     /**
-     * Check schedule and fire contextual roast.
+     * Check schedule and fire contextual roast only when there are uncompleted tasks.
      */
     suspend fun performScheduleCheck() = withContext(Dispatchers.IO) {
         if (!settings.notificationsEnabled) return@withContext
@@ -232,11 +240,13 @@ class SavageNotificationManager(private val context: Context) {
         val todayStr = dateFormat.format(Date())
         val db = AppDatabase.getDatabase(context)
         val items = db.scheduleDao().getItemsForDate(todayStr)
-        val total = items.size
         val uncompleted = items.count { !it.isCompleted }
 
-        if (total > 0 && uncompleted == 0) {
-            // Everything for today is complete! Stop nagging until new tasks exist or tomorrow!
+        if (uncompleted == 0) {
+            // 0 unfinished tasks remaining (either all completed or all deleted).
+            // Clear any active notification and schedule next check silently.
+            dismissActiveNotification()
+            scheduleNextCheck()
             return@withContext
         }
 
@@ -250,7 +260,7 @@ class SavageNotificationManager(private val context: Context) {
         // Show push notification with custom vibration
         showSavageNotification(
             roastMessage = selectedQuote,
-            uncompletedCount = if (uncompleted > 0) uncompleted else null
+            uncompletedCount = uncompleted
         )
 
         // Reschedule next check

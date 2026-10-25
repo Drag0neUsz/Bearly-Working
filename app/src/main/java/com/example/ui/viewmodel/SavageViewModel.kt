@@ -95,6 +95,12 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
                 _uiState.update { current ->
                     current.copy(items = items)
                 }
+                val uncompletedCount = items.count { !it.isCompleted }
+                if (uncompletedCount == 0) {
+                    notificationManager.dismissActiveNotification()
+                } else if (settings.notificationsEnabled) {
+                    notificationManager.scheduleNextCheck()
+                }
             }
         }
 

@@ -69,14 +69,15 @@ fun SettingsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = ComicWhiteBg
+        containerColor = ComicWhiteBg,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 14.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             // Header Frame
             Box(
@@ -84,7 +85,7 @@ fun SettingsScreen(
                     .fillMaxWidth()
                     .background(ComicSurfaceWhite)
                     .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(14.dp)
+                    .padding(horizontal = 14.dp, vertical = 10.dp)
             ) {
                 Column {
                     Text(
@@ -578,7 +579,7 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
