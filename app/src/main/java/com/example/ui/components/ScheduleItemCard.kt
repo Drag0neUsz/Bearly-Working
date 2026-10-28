@@ -55,18 +55,70 @@ fun ScheduleItemCard(
     val borderThickness = if (item.isCompleted) 1.5.dp else 2.dp
     val borderColor = if (item.isCompleted) ComicAccentGreen else ComicInkBlack
 
+    val hasCalendarAccount = item.source == ScheduleItem.SOURCE_CALENDAR || !item.calendarName.isNullOrBlank()
+
     // Full-width sharp rectangular frame
-    Box(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .background(cardBg, shape = RectangleShape)
             .border(width = borderThickness, color = borderColor, shape = RectangleShape)
             .testTag("schedule_item_${item.id}")
     ) {
+        // Separate top section for the associated email / calendar account
+        if (hasCalendarAccount) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (item.isCompleted) ComicAccentGreen.copy(alpha = 0.12f)
+                        else ComicSurfaceSubtle
+                    )
+                    .clickable(onClick = onToggleCompleted)
+                    .padding(horizontal = 14.dp, vertical = 6.dp)
+                    .testTag("schedule_item_account_${item.id}"),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(if (item.isCompleted) ComicAccentGreen else ComicInkBlack)
+                        .padding(horizontal = 7.dp, vertical = 2.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(11.dp)
+                        )
+                        Text(
+                            text = (item.calendarName ?: "CALENDAR").uppercase(),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 9.sp,
+                                letterSpacing = 0.5.sp
+                            ),
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(
+                thickness = borderThickness,
+                color = borderColor
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Square Sharp Checkbox (min 48dp touch target)
@@ -101,52 +153,30 @@ fun ScheduleItemCard(
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            // Task Content
+            // Task Content (Time + Title)
             Column(
                 modifier = Modifier
                     .weight(1f)
                     .clickable(onClick = onToggleCompleted)
             ) {
-                // Sharp Framed Badges Row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                // Time Frame Badge
+                Box(
+                    modifier = Modifier
+                        .border(width = 1.dp, color = ComicInkBlack, shape = RectangleShape)
+                        .background(ComicSurfaceSubtle)
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
-                    if (item.source == ScheduleItem.SOURCE_CALENDAR) {
-                        Box(
-                            modifier = Modifier
-                                .background(ComicInkBlack)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                text = (item.calendarName ?: "CALENDAR").uppercase(),
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 9.sp,
-                                    letterSpacing = 0.5.sp
-                                ),
-                                color = Color.White
-                            )
-                        }
-                    }
-
-                    // Time Frame Badge
-                    Box(
-                        modifier = Modifier
-                            .border(width = 1.dp, color = ComicInkBlack, shape = RectangleShape)
-                            .background(ComicSurfaceSubtle)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = timeText,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 9.sp,
-                                letterSpacing = 0.5.sp
-                            ),
-                            color = ComicInkBlack
-                        )
-                    }
+                    Text(
+                        text = timeText,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 9.sp,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = ComicInkBlack,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
