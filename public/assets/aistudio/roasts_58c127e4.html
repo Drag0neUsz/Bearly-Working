@@ -1,0 +1,391 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Roast Completion Book - Bearly Finished</title>
+<!-- Google Fonts: Nunito -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            nunito: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            duo: {
+              green: '#58cc02',
+              greenDark: '#46a302',
+              yellow: '#ffc800',
+              yellowDark: '#e5a500',
+              blue: '#1cb0f6',
+              blueDark: '#1899d6',
+              orange: '#ff9600',
+              orangeDark: '#e08300',
+              red: '#ff4b4b',
+              redDark: '#ea2b2b',
+              purple: '#ce82ff',
+              purpleDark: '#a559e3',
+              grayTrack: '#e5e5e5',
+              border: '#e5e7eb',
+              cardBg: '#ffffff',
+              pageBg: '#f7f7f7',
+              textMain: '#3c3c3c',
+              textMuted: '#777777',
+            }
+          },
+          boxShadow: {
+            'duo-green': '0 4px 0 #46a302',
+            'duo-yellow': '0 4px 0 #e5a500',
+            'duo-blue': '0 4px 0 #1899d6',
+            'duo-gray': '0 4px 0 #d1d5db',
+            'duo-card': '0 4px 0 #e5e7eb',
+            'duo-card-active': '0 4px 0 #cbd5e1',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Duolingo-style 3D tactile button & progress styling -->
+<style data-purpose="duo-tactile-styling">
+    body {
+      font-family: 'Nunito', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .btn-3d-active:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.15) !important;
+    }
+    .card-3d {
+      box-shadow: 0 5px 0 #e5e7eb;
+      transition: all 0.15s ease-in-out;
+    }
+    .card-3d:active {
+      transform: translateY(2px);
+      box-shadow: 0 3px 0 #e5e7eb;
+    }
+    /* Hide scrollbar for standard look */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-[#f0f2f5] text-duo-textMain antialiased flex justify-center min-h-screen">
+<!-- Mobile Viewport Container (iOS 390px frame) -->
+<div class="w-full max-w-[420px] bg-duo-pageBg min-h-screen flex flex-col justify-between shadow-2xl relative border-x border-gray-200 pb-24">
+<!-- BEGIN: TopStatusBar & Header -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b-2 border-duo-border px-4 pt-3 pb-3">
+<!-- iOS Status Bar Placeholder area -->
+<div class="flex items-center justify-between text-xs font-bold text-gray-400 mb-1 px-1">
+<span class="">9:41</span>
+<div class="flex items-center space-x-1.5">
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.64 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"></path></svg>
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M2 17h20v4H2v-4zm0-6h20v4H2v-4zm0-6h20v4H2V5z"></path></svg>
+<div class="w-5 h-2.5 border border-gray-400 rounded-sm p-0.5 flex items-center">
+<div class="bg-gray-500 h-full w-3 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- App Header Bar with Streak/Gems/Hearts gamified badges -->
+<div class="flex items-center justify-between mt-1">
+<div class="flex items-center space-x-2">
+<!-- Mascot Mini Avatar -->
+
+<div><h1 class="text-xl font-black text-gray-800 leading-tight tracking-tight font-['Nunito',sans-serif]">Roast Book</h1>
+<p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider font-['Nunito',sans-serif]">Bearly Finished</p></div>
+</div>
+<!-- Discovered Pill Badge -->
+<div class="flex items-center bg-amber-50 border-2 border-b-4 border-amber-400 rounded-2xl px-3 py-1 shadow-[0_2px_0_#fcd34d]">
+<span class="mr-1.5 flex items-center justify-center"><span class="text-amber-600 text-sm leading-none font-black">☒</span></span>
+<span class="text-xs font-black text-amber-600 tracking-wide">1 / 57</span>
+</div>
+</div>
+</header>
+<!-- END: TopStatusBar & Header -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 py-4 space-y-4 flex-1">
+<!-- BEGIN: Hero Sticker & Global Progress Card -->
+<section class="bg-white rounded-3xl p-4 border-2 border-gray-200 card-3d relative overflow-hidden" data-purpose="hero-progress-card">
+<!-- Playful Background Accents -->
+<div class="absolute -right-4 -bottom-4 w-24 h-24 bg-amber-50 rounded-full -z-0 opacity-60 pointer-events-none"></div>
+<div class="flex items-start space-x-3.5 z-10 relative">
+<!-- Sticker Book Icon -->
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-500 flex items-center justify-center text-3xl shadow-[0_4px_0_#d97706] flex-shrink-0"><span class="text-white text-3xl leading-none font-bold">☒</span></div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<h2 class="font-extrabold text-base text-gray-800">Roast Collection</h2>
+<span class="text-[11px] font-black uppercase tracking-wider bg-orange-100 text-orange-600 px-2.5 py-0.5 rounded-full border-2 border-b-4 border-orange-300 shadow-sm">
+                Level 1
+              </span>
+</div>
+<p class="text-xs font-bold text-gray-500 mt-0.5 leading-snug">
+              Tap cards to inspect roasts. Hidden roasts remain '<span class="text-gray-400 font-extrabold">???</span>' until earned by your habits!
+            </p>
+</div>
+</div>
+<!-- Duolingo-style Master Progress Bar -->
+<div class="mt-4 pt-2 border-t border-gray-100">
+<div class="flex justify-between items-center mb-1.5">
+<span class="text-xs font-extrabold text-gray-600 flex items-center gap-1">
+<span class="text-gray-500 text-xs inline-block mr-0.5 leading-none font-bold">☒</span> Total Discovered
+            </span>
+<span class="text-xs font-black text-amber-500">1% COMPLETED</span>
+</div>
+<!-- Outer Track -->
+<div class="w-full bg-gray-200 h-5 rounded-full p-1 relative overflow-hidden shadow-inner">
+<!-- Filled Bar with glossy reflection -->
+<div class="bg-gradient-to-r from-amber-400 to-yellow-400 h-full rounded-full relative" style="width: 8%;">
+<!-- Highlight stripe -->
+<div class="absolute top-0.5 left-1 right-1 h-1 bg-white/40 rounded-full"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- END: Hero Sticker & Global Progress Card -->
+<!-- Section Title Divider -->
+<div class="flex items-center space-x-2 pt-1 px-1">
+<h3 class="text-xs font-black tracking-wider text-gray-400 uppercase">Roast Categories (5)</h3>
+<div class="h-0.5 flex-1 bg-gray-200 rounded-full"></div>
+</div>
+<!-- BEGIN: Category Cards List -->
+<div class="space-y-3.5">
+<!-- Card 1: Bear Pokes & Callouts (Unlocked active state) -->
+<article class="bg-white rounded-3xl p-4 border-2 border-amber-300 card-3d relative" data-purpose="roast-category-card">
+<!-- Unlocked badge icon -->
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-amber-100 border-2 border-amber-400 flex items-center justify-center text-2xl shadow-[0_3px_0_#f59e0b]"><span class="text-amber-500 text-2xl leading-none font-bold">☒</span></div>
+<div>
+<h3 class="font-extrabold text-[15px] text-gray-800 leading-tight">Bear Pokes &amp; Callouts</h3>
+<p class="text-xs font-semibold text-gray-400 mt-0.5">Active schedule companion taps</p>
+</div>
+</div>
+<!-- Gamified counter chip -->
+<div class="bg-amber-100 text-amber-800 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-b-4 border-amber-400 shadow-sm">
+              1 / 10
+            </div>
+</div>
+<p class="text-xs text-gray-500 mt-2.5 font-medium leading-relaxed">
+            Special roasts triggered exclusively when you poke your grumpy bear during active study time.
+          </p>
+<!-- Thick Duolingo Progress Bar -->
+<div class="mt-3">
+<div class="w-full bg-gray-100 h-3.5 rounded-full p-0.5 overflow-hidden border border-gray-200">
+<div class="bg-duo-green h-full rounded-full relative" style="width: 10%;">
+<div class="absolute top-0.5 left-1 right-1 h-0.5 bg-white/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Action Footer with 3D Button -->
+<div class="mt-3.5 flex items-center justify-between pt-2 border-t border-gray-100">
+<div class="flex items-center space-x-1.5 text-xs font-black text-duo-green bg-green-100 px-2.5 py-1 rounded-xl border-2 border-b-4 border-duo-green shadow-sm">
+<span class="">🔓</span>
+<span class="">1 New Roast Found</span>
+</div>
+<button class="bg-duo-green text-white font-extrabold text-xs px-4 py-2 rounded-xl shadow-duo-green btn-3d-active flex items-center space-x-1">
+<span class="">VIEW ROASTS</span>
+<span class="">→</span>
+</button>
+</div>
+</article>
+<!-- Card 2: Finished Day Pokes -->
+<article class="bg-white rounded-3xl p-4 border-2 border-gray-200 card-3d" data-purpose="roast-category-card">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-blue-50 border-2 border-blue-200 flex items-center justify-center text-2xl shadow-[0_3px_0_#93c5fd]"><span class="text-blue-400 text-2xl leading-none font-bold">☒</span></div>
+<div>
+<h3 class="font-extrabold text-[15px] text-gray-800 leading-tight">Finished Day Pokes</h3>
+<p class="text-xs font-semibold text-gray-400 mt-0.5">End-of-day wrapup reflections</p>
+</div>
+</div>
+<!-- Zero progress pill -->
+<div class="bg-gray-100 text-gray-500 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm">
+              0 / 14
+            </div>
+</div>
+<p class="text-xs text-gray-500 mt-2.5 font-medium leading-relaxed">
+            Special roasts triggered when poking the companion after successfully completing all planned tasks for the day.
+          </p>
+<!-- Thick Duolingo Progress Bar (Empty track) -->
+<div class="mt-3">
+<div class="w-full bg-gray-100 h-3.5 rounded-full p-0.5 overflow-hidden border border-gray-200">
+<div class="bg-duo-blue h-full rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-3.5 flex items-center justify-between pt-2 border-t border-gray-100">
+<span class="text-xs font-black text-gray-500 bg-gray-100 px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm flex items-center gap-1">
+<span class="">🔒</span> All 14 Locked
+            </span>
+<button class="bg-gray-100 text-gray-600 font-extrabold text-xs px-4 py-2 rounded-xl shadow-duo-gray btn-3d-active flex items-center space-x-1 border border-gray-200 hover:bg-gray-200">
+<span class="">VIEW ROASTS</span>
+<span class="">→</span>
+</button>
+</div>
+</article>
+<!-- Card 3: Ignored Deadlines & Priority -->
+<article class="bg-white rounded-3xl p-4 border-2 border-gray-200 card-3d" data-purpose="roast-category-card">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-red-50 border-2 border-red-200 flex items-center justify-center text-2xl shadow-[0_3px_0_#fca5a5]"><span class="text-red-400 text-2xl leading-none font-bold">☒</span></div>
+<div>
+<h3 class="font-extrabold text-[15px] text-gray-800 leading-tight">Ignored Deadlines</h3>
+<p class="text-xs font-semibold text-gray-400 mt-0.5">High priority task neglect</p>
+</div>
+</div>
+<div class="bg-gray-100 text-gray-500 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm">
+              0 / 7
+            </div>
+</div>
+<p class="text-xs text-gray-500 mt-2.5 font-medium leading-relaxed">
+            Triggered in push notifications when scheduled critical events are overdue, abandoned, and left untouched.
+          </p>
+<!-- Thick Duolingo Progress Bar -->
+<div class="mt-3">
+<div class="w-full bg-gray-100 h-3.5 rounded-full p-0.5 overflow-hidden border border-gray-200">
+<div class="bg-duo-red h-full rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-3.5 flex items-center justify-between pt-2 border-t border-gray-100">
+<span class="text-xs font-black text-gray-500 bg-gray-100 px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm flex items-center gap-1">
+<span class="">🔒</span> All 7 Locked
+            </span>
+<button class="bg-gray-100 text-gray-600 font-extrabold text-xs px-4 py-2 rounded-xl shadow-duo-gray btn-3d-active flex items-center space-x-1 border border-gray-200 hover:bg-gray-200">
+<span class="">VIEW ROASTS</span>
+<span class="">→</span>
+</button>
+</div>
+</article>
+<!-- Card 4: Time Running Out -->
+<article class="bg-white rounded-3xl p-4 border-2 border-gray-200 card-3d" data-purpose="roast-category-card">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-orange-50 border-2 border-orange-200 flex items-center justify-center text-2xl shadow-[0_3px_0_#fdba74]"><span class="text-orange-400 text-2xl leading-none font-bold">☒</span></div>
+<div>
+<h3 class="font-extrabold text-[15px] text-gray-800 leading-tight">Time Running Out</h3>
+<p class="text-xs font-semibold text-gray-400 mt-0.5">Late afternoon panic reminders</p>
+</div>
+</div>
+<div class="bg-gray-100 text-gray-500 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm">
+              0 / 5
+            </div>
+</div>
+<p class="text-xs text-gray-500 mt-2.5 font-medium leading-relaxed">
+            Triggered in the evening as daylight slips away with a massive pile of unfinished tasks remaining.
+          </p>
+<!-- Thick Duolingo Progress Bar -->
+<div class="mt-3">
+<div class="w-full bg-gray-100 h-3.5 rounded-full p-0.5 overflow-hidden border border-gray-200">
+<div class="bg-duo-orange h-full rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-3.5 flex items-center justify-between pt-2 border-t border-gray-100">
+<span class="text-xs font-black text-gray-500 bg-gray-100 px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm flex items-center gap-1">
+<span class="">🔒</span> All 5 Locked
+            </span>
+<button class="bg-gray-100 text-gray-600 font-extrabold text-xs px-4 py-2 rounded-xl shadow-duo-gray btn-3d-active flex items-center space-x-1 border border-gray-200 hover:bg-gray-200">
+<span class="">VIEW ROASTS</span>
+<span class="">→</span>
+</button>
+</div>
+</article>
+<!-- Card 5: Broken Promises to Oneself -->
+<article class="bg-white rounded-3xl p-4 border-2 border-gray-200 card-3d" data-purpose="roast-category-card">
+<div class="flex items-start justify-between">
+<div class="flex items-center space-x-3">
+<div class="w-12 h-12 rounded-2xl bg-purple-50 border-2 border-purple-200 flex items-center justify-center text-2xl shadow-[0_3px_0_#d8b4fe]"><span class="text-purple-400 text-2xl leading-none font-bold">☒</span></div>
+<div>
+<h3 class="font-extrabold text-[15px] text-gray-800 leading-tight">Broken Promises</h3>
+<p class="text-xs font-semibold text-gray-400 mt-0.5">Self-commitment dropoffs</p>
+</div>
+</div>
+<div class="bg-gray-100 text-gray-500 font-black text-xs px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm">
+              0 / 7
+            </div>
+</div>
+<p class="text-xs text-gray-500 mt-2.5 font-medium leading-relaxed">
+            Triggered when deeply personal commitments and self-proclaimed habits are solemnly broken.
+          </p>
+<!-- Thick Duolingo Progress Bar -->
+<div class="mt-3">
+<div class="w-full bg-gray-100 h-3.5 rounded-full p-0.5 overflow-hidden border border-gray-200">
+<div class="bg-duo-purple h-full rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+<!-- Action Footer -->
+<div class="mt-3.5 flex items-center justify-between pt-2 border-t border-gray-100">
+<span class="text-xs font-black text-gray-500 bg-gray-100 px-2.5 py-1 rounded-xl border-2 border-b-4 border-gray-300 shadow-sm flex items-center gap-1">
+<span class="">🔒</span> All 7 Locked
+            </span>
+<button class="bg-gray-100 text-gray-600 font-extrabold text-xs px-4 py-2 rounded-xl shadow-duo-gray btn-3d-active flex items-center space-x-1 border border-gray-200 hover:bg-gray-200">
+<span class="">VIEW ROASTS</span>
+<span class="">→</span>
+</button>
+</div>
+</article>
+</div>
+<!-- END: Category Cards List -->
+<!-- Playful Motivator Quote Card -->
+<section class="bg-amber-100/70 border-2 border-amber-300 rounded-3xl p-4 text-center mt-4">
+<p class="text-xs font-extrabold text-amber-800">"Procrastinate more to unlock the rest... or actually do your work!" — Grumpy Bear</p>
+</section>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: DuolingoStyle BottomNavigationBar -->
+<nav class="fixed bottom-0 max-w-[420px] w-full bg-white border-t-2 border-duo-border px-3 pt-2 pb-5 z-40 flex justify-around items-center" data-purpose="bottom-nav-bar">
+<!-- Tab 1: Today -->
+<button class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-600 w-16 py-1 transition-colors group">
+<div class="w-7 h-7 flex items-center justify-center"><svg class="w-6 h-6 stroke-current" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="m8.5 12.5 2.5 2.5 5-5"></path></svg></div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1">Today</span>
+</button>
+<!-- Tab 2: Calendar -->
+<button class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-600 w-16 py-1 transition-colors group">
+<div class="w-7 h-7 flex items-center justify-center"><svg class="w-6 h-6 stroke-current" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24"><rect height="18" rx="3" ry="3" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg></div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1">Calendar</span>
+</button>
+<!-- Tab 3: Roasts (ACTIVE Duolingo highlighted tab) -->
+<button class="flex flex-col items-center justify-center text-duo-green w-18 py-1 transition-all relative">
+<div class="w-8 h-8 rounded-2xl bg-green-100 border-2 border-duo-green flex items-center justify-center text-duo-green shadow-[0_2px_0_#46a302]">
+<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+<path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1 text-duo-green">Roasts</span>
+</button>
+<!-- Tab 4: Settings -->
+<button class="flex flex-col items-center justify-center text-gray-400 hover:text-gray-600 w-16 py-1 transition-colors group">
+<div class="w-7 h-7 flex items-center justify-center">
+<svg class="w-6 h-6 stroke-current" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1">Settings</span>
+</button>
+</nav>
+<!-- END: DuolingoStyle BottomNavigationBar -->
+<!-- iOS Home Indicator bar -->
+<div class="fixed bottom-1.5 left-0 right-0 max-w-[420px] mx-auto flex justify-center pointer-events-none z-50">
+<div class="w-32 h-1 bg-gray-900 rounded-full"></div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+</body></html>

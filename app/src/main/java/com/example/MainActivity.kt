@@ -16,22 +16,24 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.FormatQuote
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.filled.Today
-import androidx.compose.material.icons.outlined.Today
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -135,7 +137,7 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor = ComicWhiteBg,
+                    containerColor = SoftCanvasBg,
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                     topBar = {
@@ -143,157 +145,68 @@ class MainActivity : ComponentActivity() {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(ComicInkBlack)
+                                .background(SoftNavy)
                                 .windowInsetsTopHeight(WindowInsets.statusBars)
                                 .testTag("status_bar_dark_strip")
                         )
                     },
                     bottomBar = {
-                        // Sharp Full-Width Compact Comic Bottom Navigation Bar
-                        Box(
+                        // Tactile Bottom Navigation Bar
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(ComicSurfaceWhite)
-                                .border(width = 2.dp, color = ComicInkBlack)
+                                .background(SoftSurfaceWhite)
                                 .windowInsetsPadding(WindowInsets.navigationBars)
                                 .testTag("bottom_nav_bar")
                         ) {
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                // Tab 1: SCHEDULE (TODAY)
-                                val isSched = currentTab == MainDestination.SCHEDULE
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .background(if (isSched) ComicInkBlack else ComicSurfaceWhite)
-                                        .clickable { currentTab = MainDestination.SCHEDULE }
-                                        .padding(vertical = 8.dp)
-                                        .testTag("nav_schedule"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            imageVector = if (isSched) Icons.Filled.Today else Icons.Outlined.Today,
-                                            contentDescription = "Today Schedule",
-                                            tint = if (isSched) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(19.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "TODAY",
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp,
-                                            color = if (isSched) Color.White else ComicInkBlack
-                                        )
-                                    }
-                                }
+                            HorizontalDivider(thickness = 2.dp, color = SoftBorder)
 
-                                // Tab Divider
-                                Box(
-                                    modifier = Modifier
-                                        .width(2.dp)
-                                        .height(46.dp)
-                                        .background(ComicInkBlack)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                                horizontalArrangement = Arrangement.SpaceAround,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                BottomNavTabItem(
+                                    label = "TODAY",
+                                    isSelected = currentTab == MainDestination.SCHEDULE,
+                                    activeIcon = Icons.Filled.CheckCircle,
+                                    inactiveIcon = Icons.Outlined.CheckCircle,
+                                    onClick = { currentTab = MainDestination.SCHEDULE },
+                                    testTag = "nav_schedule",
+                                    modifier = Modifier.weight(1f)
                                 )
 
-                                // Tab 2: CALENDAR
-                                val isCalendar = currentTab == MainDestination.CALENDAR
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .background(if (isCalendar) ComicInkBlack else ComicSurfaceWhite)
-                                        .clickable { currentTab = MainDestination.CALENDAR }
-                                        .padding(vertical = 8.dp)
-                                        .testTag("nav_calendar"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            imageVector = if (isCalendar) Icons.Filled.CalendarMonth else Icons.Outlined.CalendarMonth,
-                                            contentDescription = "Calendar",
-                                            tint = if (isCalendar) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(19.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "CALENDAR",
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp,
-                                            color = if (isCalendar) Color.White else ComicInkBlack
-                                        )
-                                    }
-                                }
-
-                                // Tab Divider
-                                Box(
-                                    modifier = Modifier
-                                        .width(2.dp)
-                                        .height(46.dp)
-                                        .background(ComicInkBlack)
+                                BottomNavTabItem(
+                                    label = "CALENDAR",
+                                    isSelected = currentTab == MainDestination.CALENDAR,
+                                    activeIcon = Icons.Filled.CalendarMonth,
+                                    inactiveIcon = Icons.Outlined.CalendarMonth,
+                                    onClick = { currentTab = MainDestination.CALENDAR },
+                                    testTag = "nav_calendar",
+                                    modifier = Modifier.weight(1f)
                                 )
 
-                                // Tab 3: ROASTS
-                                val isRoasts = currentTab == MainDestination.ROASTS
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .background(if (isRoasts) ComicInkBlack else ComicSurfaceWhite)
-                                        .clickable { currentTab = MainDestination.ROASTS }
-                                        .padding(vertical = 8.dp)
-                                        .testTag("nav_roasts"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            imageVector = if (isRoasts) Icons.Filled.FormatQuote else Icons.Outlined.FormatQuote,
-                                            contentDescription = "Roasts",
-                                            tint = if (isRoasts) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(19.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "ROASTS",
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp,
-                                            color = if (isRoasts) Color.White else ComicInkBlack
-                                        )
-                                    }
-                                }
-
-                                // Tab Divider
-                                Box(
-                                    modifier = Modifier
-                                        .width(2.dp)
-                                        .height(46.dp)
-                                        .background(ComicInkBlack)
+                                BottomNavTabItem(
+                                    label = "ROASTS",
+                                    isSelected = currentTab == MainDestination.ROASTS,
+                                    activeIcon = Icons.Filled.FormatQuote,
+                                    inactiveIcon = Icons.Outlined.FormatQuote,
+                                    onClick = { currentTab = MainDestination.ROASTS },
+                                    testTag = "nav_roasts",
+                                    modifier = Modifier.weight(1f)
                                 )
 
-                                // Tab 4: SETTINGS
-                                val isSettings = currentTab == MainDestination.SETTINGS
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .background(if (isSettings) ComicInkBlack else ComicSurfaceWhite)
-                                        .clickable { currentTab = MainDestination.SETTINGS }
-                                        .padding(vertical = 8.dp)
-                                        .testTag("nav_settings"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            imageVector = if (isSettings) Icons.Filled.Settings else Icons.Outlined.Settings,
-                                            contentDescription = "Settings",
-                                            tint = if (isSettings) Color.White else ComicInkBlack,
-                                            modifier = Modifier.size(19.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "SETTINGS",
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp,
-                                            color = if (isSettings) Color.White else ComicInkBlack
-                                        )
-                                    }
-                                }
+                                BottomNavTabItem(
+                                    label = "SETTINGS",
+                                    isSelected = currentTab == MainDestination.SETTINGS,
+                                    activeIcon = Icons.Filled.Settings,
+                                    inactiveIcon = Icons.Outlined.Settings,
+                                    onClick = { currentTab = MainDestination.SETTINGS },
+                                    testTag = "nav_settings",
+                                    modifier = Modifier.weight(1f)
+                                )
                             }
                         }
                     }
@@ -380,5 +293,73 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BottomNavTabItem(
+    label: String,
+    isSelected: Boolean,
+    activeIcon: ImageVector,
+    inactiveIcon: ImageVector,
+    onClick: () -> Unit,
+    testTag: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .padding(vertical = 2.dp)
+            .testTag(testTag),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        if (isSelected) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .background(SoftGreenShadow, shape = CircleShape)
+                    .padding(bottom = 2.dp)
+                    .background(SoftGreenLight, shape = CircleShape)
+                    .border(width = 2.dp, color = SoftGreen, shape = CircleShape)
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = activeIcon,
+                    contentDescription = label,
+                    tint = SoftGreen,
+                    modifier = Modifier.size(19.dp)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier.size(34.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = inactiveIcon,
+                    contentDescription = label,
+                    tint = SoftTextMuted,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(3.dp))
+
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Black,
+                fontSize = 10.sp,
+                letterSpacing = 0.6.sp
+            ),
+            color = if (isSelected) SoftGreen else SoftTextMuted
+        )
     }
 }

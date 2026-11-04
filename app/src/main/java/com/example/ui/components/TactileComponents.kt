@@ -1,0 +1,272 @@
+package com.example.ui.components
+
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.example.ui.theme.*
+
+/**
+ * Tactile 3D Card with a solid bottom rim extrusion.
+ */
+@Composable
+fun Tactile3DCard(
+    modifier: Modifier = Modifier,
+    containerColor: Color = SoftSurfaceWhite,
+    borderColor: Color = SoftBorder,
+    bottomLipColor: Color = borderColor,
+    cornerRadius: Dp = 24.dp,
+    lipHeight: Dp = 3.dp,
+    borderWidth: Dp = 2.dp,
+    onClick: (() -> Unit)? = null,
+    contentPadding: PaddingValues = PaddingValues(16.dp),
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val pressOffset by animateDpAsState(
+        targetValue = if (onClick != null && isPressed) (lipHeight - 1.dp).coerceAtLeast(0.dp) else 0.dp,
+        animationSpec = tween(70),
+        label = "cardPressOffset"
+    )
+    val currentLip by animateDpAsState(
+        targetValue = if (onClick != null && isPressed) 1.dp else lipHeight,
+        animationSpec = tween(70),
+        label = "cardLipHeight"
+    )
+
+    val shape = RoundedCornerShape(cornerRadius)
+
+    Box(
+        modifier = modifier
+            .padding(top = pressOffset)
+            .background(bottomLipColor, shape = shape)
+            .padding(bottom = currentLip)
+            .background(containerColor, shape = shape)
+            .border(width = borderWidth, color = borderColor, shape = shape)
+            .clip(shape)
+            .then(
+                if (onClick != null) {
+                    Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null,
+                        onClick = onClick
+                    )
+                } else Modifier
+            )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(contentPadding),
+            content = content
+        )
+    }
+}
+
+/**
+ * Tactile 3D Push Button that physically depresses on tap.
+ */
+@Composable
+fun Tactile3DButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    containerColor: Color = SoftGreen,
+    bottomLipColor: Color = SoftGreenShadow,
+    borderColor: Color = bottomLipColor,
+    cornerRadius: Dp = 16.dp,
+    lipHeight: Dp = 4.dp,
+    borderWidth: Dp = 2.dp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 18.dp, vertical = 12.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val pressOffset by animateDpAsState(
+        targetValue = if (isPressed) (lipHeight - 1.dp).coerceAtLeast(0.dp) else 0.dp,
+        animationSpec = tween(60),
+        label = "btnPressOffset"
+    )
+    val currentLip by animateDpAsState(
+        targetValue = if (isPressed) 1.dp else lipHeight,
+        animationSpec = tween(60),
+        label = "btnLipHeight"
+    )
+
+    val shape = RoundedCornerShape(cornerRadius)
+
+    Box(
+        modifier = modifier
+            .padding(top = pressOffset)
+            .background(bottomLipColor, shape = shape)
+            .padding(bottom = currentLip)
+            .background(containerColor, shape = shape)
+            .border(width = borderWidth, color = borderColor, shape = shape)
+            .clip(shape)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                role = Role.Button,
+                onClick = onClick
+            )
+            .padding(contentPadding),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            content = content
+        )
+    }
+}
+
+/**
+ * Tactile 3D Pill / Badge (`border-2 border-b-4`).
+ */
+@Composable
+fun Tactile3DBadge(
+    modifier: Modifier = Modifier,
+    containerColor: Color = SoftOrangeLight,
+    borderColor: Color = SoftOrangeBorder,
+    bottomLipColor: Color = borderColor,
+    shape: Shape = CircleShape,
+    lipHeight: Dp = 2.5.dp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+    onClick: (() -> Unit)? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    Box(
+        modifier = modifier
+            .background(bottomLipColor, shape = shape)
+            .padding(bottom = lipHeight)
+            .background(containerColor, shape = shape)
+            .border(width = 1.5.dp, color = borderColor, shape = shape)
+            .clip(shape)
+            .then(
+                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+            )
+            .padding(contentPadding),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            content = content
+        )
+    }
+}
+
+/**
+ * Chunky Glossy Capsule Progress Bar.
+ */
+@Composable
+fun TactileGlossyProgressBar(
+    progress: Float,
+    modifier: Modifier = Modifier,
+    height: Dp = 16.dp,
+    trackColor: Color = Color(0xFFF1F5F9),
+    trackBorderColor: Color = SoftBorder,
+    fillBrush: Brush = Brush.horizontalGradient(listOf(SoftGreen, Color(0xFF7BE329))),
+    minVisualFraction: Float = 0.08f
+) {
+    val visualFraction = if (progress <= 0f) {
+        minVisualFraction
+    } else {
+        progress.coerceIn(minVisualFraction, 1f)
+    }
+
+    Box(
+        modifier = modifier
+            .height(height)
+            .background(trackColor, shape = CircleShape)
+            .border(width = 1.5.dp, color = trackBorderColor, shape = CircleShape)
+            .padding(2.dp)
+            .clip(CircleShape)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(fraction = visualFraction)
+                .background(brush = fillBrush, shape = CircleShape)
+                .clip(CircleShape)
+        ) {
+            // Glossy white top highlight reflection
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.42f)
+                    .padding(horizontal = 4.dp, vertical = 1.5.dp)
+                    .background(Color.White.copy(alpha = 0.35f), shape = CircleShape)
+            )
+        }
+    }
+}
+
+/**
+ * Chunky 3D Tactile Toggle Switch.
+ */
+@Composable
+fun TactileToggleSwitch(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val trackColor by animateColorAsState(
+        targetValue = if (checked) SoftGreen else Color(0xFFCBD5E1),
+        animationSpec = tween(180),
+        label = "switchTrackColor"
+    )
+    val trackBorderColor by animateColorAsState(
+        targetValue = if (checked) SoftGreenShadow else Color(0xFF94A3B8),
+        animationSpec = tween(180),
+        label = "switchBorderColor"
+    )
+    val thumbOffset by animateDpAsState(
+        targetValue = if (checked) 24.dp else 0.dp,
+        animationSpec = tween(180),
+        label = "switchThumbOffset"
+    )
+
+    Box(
+        modifier = modifier
+            .width(56.dp)
+            .height(32.dp)
+            .clip(CircleShape)
+            .background(trackColor, shape = CircleShape)
+            .border(width = 2.dp, color = trackBorderColor, shape = CircleShape)
+            .clickable(
+                role = Role.Switch,
+                onClick = { onCheckedChange(!checked) }
+            )
+            .padding(horizontal = 4.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        Box(
+            modifier = Modifier
+                .offset(x = thumbOffset)
+                .size(22.dp)
+                .background(Color(0xFFD0D5DD), shape = CircleShape)
+                .padding(bottom = 2.dp)
+                .background(Color.White, shape = CircleShape)
+        )
+    }
+}

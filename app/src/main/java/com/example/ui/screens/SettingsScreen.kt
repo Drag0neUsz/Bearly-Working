@@ -1,38 +1,24 @@
 package com.example.ui.screens
 
-import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.components.IosAlarmStyleWheelTimeDialog
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.SavageUiState
-import kotlinx.coroutines.flow.distinctUntilChanged
 
 enum class QuietTimePickerTarget {
     NONE,
@@ -69,53 +55,182 @@ fun SettingsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = ComicWhiteBg,
+        containerColor = SoftCanvasBg,
         contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            // Header Frame
-            Box(
+            // Sticky Top Header Bar
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(ComicSurfaceWhite)
-                    .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(horizontal = 14.dp, vertical = 10.dp)
+                    .background(SoftSurfaceWhite)
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 14.dp)
+                ) {
                     Text(
-                        text = "SETTINGS & FREQUENCY",
-                        style = MaterialTheme.typography.titleMedium.copy(
+                        text = "Settings & Frequency",
+                        style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 1.2.sp
+                            fontSize = 22.sp
                         ),
-                        color = ComicInkBlack
+                        color = SoftTextPrimary
                     )
                     Text(
-                        text = "Configure how often the bear roasts you until tasks are done.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ComicTextSecondary
+                        text = "Configure how often the bear roasts you",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        ),
+                        color = SoftTextMuted
                     )
                 }
+                HorizontalDivider(thickness = 2.dp, color = SoftBorder)
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Master Push Notification Frame
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ComicSurfaceWhite)
-                    .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(14.dp)
-                    .testTag("card_notification_toggle")
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Column {
+                // =============================================================
+                // CARD 1: RELENTLESS POKES
+                // =============================================================
+                Tactile3DCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("card_notification_toggle"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 24.dp,
+                    lipHeight = 3.dp,
+                    contentPadding = PaddingValues(18.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .background(Color(0xFFFFFBEB), shape = RoundedCornerShape(14.dp))
+                                    .border(width = 2.dp, color = Color(0xFFFDE68A), shape = RoundedCornerShape(14.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "☒",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFF59E0B)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "RELENTLESS POKES",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.5.sp,
+                                        fontSize = 15.sp
+                                    ),
+                                    color = SoftTextPrimary
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "Pokes you continuously until 100% of tasks are completed.",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp,
+                                        lineHeight = 16.sp
+                                    ),
+                                    color = SoftTextMuted
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        TactileToggleSwitch(
+                            checked = uiState.notificationsEnabled,
+                            onCheckedChange = {
+                                if (it && !uiState.hasNotificationPermission) {
+                                    onRequestNotificationPermission()
+                                }
+                                onToggleNotifications(it)
+                            },
+                            modifier = Modifier.testTag("switch_notifications")
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 3D Action Button: Test Savage Notification Now
+                    Tactile3DButton(
+                        onClick = {
+                            if (!uiState.hasNotificationPermission) {
+                                onRequestNotificationPermission()
+                            }
+                            onTestNotification()
+                        },
+                        containerColor = SoftOrange,
+                        bottomLipColor = SoftOrangeShadow,
+                        borderColor = SoftOrangeShadow,
+                        cornerRadius = 16.dp,
+                        lipHeight = 4.5.dp,
+                        contentPadding = PaddingValues(vertical = 13.dp, horizontal = 16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("btn_test_notification")
+                    ) {
+                        Text(
+                            text = "☒",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "TEST SAVAGE NOTIFICATION NOW",
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 13.sp,
+                                letterSpacing = 0.6.sp
+                            ),
+                            color = Color.White
+                        )
+                    }
+                }
+
+                // =============================================================
+                // CARD 2: POKE INTERVAL
+                // =============================================================
+                Tactile3DCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("card_interval_settings"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 24.dp,
+                    lipHeight = 3.dp,
+                    contentPadding = PaddingValues(18.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -125,413 +240,470 @@ fun SettingsScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.NotificationsActive,
-                                contentDescription = null,
-                                tint = ComicInkBlack,
-                                modifier = Modifier.size(26.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(38.dp)
+                                    .background(Color(0xFFEFF6FF), shape = RoundedCornerShape(12.dp))
+                                    .border(width = 2.dp, color = Color(0xFFBFDBFE), shape = RoundedCornerShape(12.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "☒",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF3B82F6)
+                                )
+                            }
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = "RELENTLESS NOTIFICATIONS",
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black),
-                                    color = ComicInkBlack
+                                    text = "POKE INTERVAL",
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.5.sp,
+                                        fontSize = 14.sp
+                                    ),
+                                    color = SoftTextPrimary
                                 )
                                 Text(
-                                    text = "Pokes you until 100% of tasks are completed",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = ComicTextSecondary
+                                    text = "Uncensored callouts timing",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = SoftTextMuted
                                 )
                             }
                         }
 
-                        Switch(
-                            checked = uiState.notificationsEnabled,
-                            onCheckedChange = {
-                                if (it && !uiState.hasNotificationPermission) {
-                                    onRequestNotificationPermission()
-                                }
-                                onToggleNotifications(it)
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = ComicInkBlack
-                            ),
-                            modifier = Modifier.testTag("switch_notifications")
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Test Notification Button (Custom 3-short + 1-long pattern)
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(ComicAccentRed)
-                            .clickable {
-                                if (!uiState.hasNotificationPermission) {
-                                    onRequestNotificationPermission()
-                                }
-                                onTestNotification()
-                            }
-                            .padding(vertical = 12.dp)
-                            .testTag("btn_test_notification"),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(imageVector = Icons.Default.Bolt, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
+                        Tactile3DBadge(
+                            containerColor = SoftOrangeLight,
+                            borderColor = SoftOrangeBorder,
+                            bottomLipColor = SoftOrangeBorder,
+                            shape = RoundedCornerShape(12.dp),
+                            lipHeight = 3.dp,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 5.dp)
+                        ) {
                             Text(
-                                text = "TEST SAVAGE NOTIFICATION NOW",
-                                fontWeight = FontWeight.Black,
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                letterSpacing = 0.5.sp
+                                text = "EVERY ${uiState.notificationIntervalMinutes} MIN",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp,
+                                    letterSpacing = 0.5.sp
+                                ),
+                                color = SoftOrange
                             )
                         }
                     }
-                }
-            }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Notification Interval Frame (Default 120m)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ComicSurfaceWhite)
-                    .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(14.dp)
-                    .testTag("card_interval_settings")
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Timer,
-                            contentDescription = null,
-                            tint = ComicInkBlack,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "POKE INTERVAL",
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black),
-                            color = ComicInkBlack
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
-                        text = "EVERY ${uiState.notificationIntervalMinutes} MINUTES",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                        color = ComicAccentRed
-                    )
-                    Text(
-                        text = "Sends a new uncensored callout at this interval until everything is marked done.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ComicTextSecondary
+                        text = "Sends a fresh roast at this interval until everything is marked done.",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp
+                        ),
+                        color = SoftTextMuted
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
+                    // 3x2 Grid of Tactile 3D Interval Buttons
                     val intervals = listOf(15, 30, 45, 60, 90, 120)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(width = 1.5.dp, color = ComicInkBlack)
-                    ) {
-                        intervals.take(3).forEachIndexed { index, mins ->
-                            val isSelected = uiState.notificationIntervalMinutes == mins
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .background(if (isSelected) ComicInkBlack else ComicSurfaceWhite)
-                                    .clickable { onSetInterval(mins) }
-                                    .padding(vertical = 10.dp)
-                                    .testTag("chip_interval_$mins"),
-                                contentAlignment = Alignment.Center
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        for (rowIntervals in intervals.chunked(3)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                Text(
-                                    text = "${mins}M",
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 13.sp,
-                                    color = if (isSelected) Color.White else ComicInkBlack
-                                )
-                            }
-                            if (index < 2) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(1.5.dp)
-                                        .height(38.dp)
-                                        .background(ComicInkBlack)
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .border(width = 1.5.dp, color = ComicInkBlack)
-                    ) {
-                        intervals.drop(3).forEachIndexed { index, mins ->
-                            val isSelected = uiState.notificationIntervalMinutes == mins
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .background(if (isSelected) ComicInkBlack else ComicSurfaceWhite)
-                                    .clickable { onSetInterval(mins) }
-                                    .padding(vertical = 10.dp)
-                                    .testTag("chip_interval_$mins"),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "${mins}M",
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 13.sp,
-                                    color = if (isSelected) Color.White else ComicInkBlack
-                                )
-                            }
-                            if (index < 2) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(1.5.dp)
-                                        .height(38.dp)
-                                        .background(ComicInkBlack)
-                                )
+                                for (mins in rowIntervals) {
+                                    val isSelected = uiState.notificationIntervalMinutes == mins
+                                    Tactile3DButton(
+                                        onClick = { onSetInterval(mins) },
+                                        containerColor = if (isSelected) SoftGreen else SoftSurfaceWhite,
+                                        bottomLipColor = if (isSelected) SoftGreenShadow else SoftBorder,
+                                        borderColor = if (isSelected) SoftGreenShadow else SoftBorder,
+                                        cornerRadius = 16.dp,
+                                        lipHeight = 3.5.dp,
+                                        contentPadding = PaddingValues(vertical = 10.dp, horizontal = 8.dp),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .testTag("chip_interval_$mins")
+                                    ) {
+                                        Text(
+                                            text = if (isSelected) "${mins}M ✓" else "${mins}M",
+                                            style = MaterialTheme.typography.labelLarge.copy(
+                                                fontWeight = FontWeight.ExtraBold,
+                                                fontSize = 13.sp
+                                            ),
+                                            color = if (isSelected) Color.White else Color(0xFF4B4B4B)
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Slider(
-                        value = uiState.notificationIntervalMinutes.toFloat(),
-                        onValueChange = { onSetInterval(it.toInt()) },
-                        valueRange = 5f..180f,
-                        steps = 34,
-                        colors = SliderDefaults.colors(
-                            thumbColor = ComicInkBlack,
-                            activeTrackColor = ComicInkBlack,
-                            inactiveTrackColor = ComicBorderSubtle
-                        ),
-                        modifier = Modifier.testTag("slider_interval")
-                    )
+                    // Custom Fine-Tune Slider Box
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(SoftSurfaceSubtle, shape = RoundedCornerShape(18.dp))
+                            .border(width = 2.dp, color = SoftBorder, shape = RoundedCornerShape(18.dp))
+                            .padding(horizontal = 14.dp, vertical = 12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "☒ CUSTOM FINE-TUNE",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.6.sp,
+                                    fontSize = 11.sp
+                                ),
+                                color = SoftTextSecondary
+                            )
+
+                            Tactile3DBadge(
+                                containerColor = Color(0xFFECFDF5),
+                                borderColor = Color(0xFF6EE7B7),
+                                bottomLipColor = Color(0xFF6EE7B7),
+                                shape = RoundedCornerShape(10.dp),
+                                lipHeight = 2.5.dp,
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.5.dp)
+                            ) {
+                                Text(
+                                    text = "${uiState.notificationIntervalMinutes} Min",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = SoftGreen
+                                )
+                            }
+                        }
+
+                        Slider(
+                            value = uiState.notificationIntervalMinutes.toFloat(),
+                            onValueChange = { onSetInterval(it.toInt()) },
+                            valueRange = 5f..180f,
+                            steps = 34,
+                            colors = SliderDefaults.colors(
+                                thumbColor = SoftGreen,
+                                activeTrackColor = SoftGreen,
+                                inactiveTrackColor = SoftBorder
+                            ),
+                            modifier = Modifier.testTag("slider_interval")
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "5m min",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                ),
+                                color = SoftTextMuted,
+                                modifier = Modifier.clickable { onSetInterval(5) }
+                            )
+                            Text(
+                                text = "DRAG FOR CUSTOM",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp,
+                                    letterSpacing = 0.6.sp
+                                ),
+                                color = SoftTextMuted
+                            )
+                            Text(
+                                text = "180m max",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                ),
+                                color = SoftTextMuted,
+                                modifier = Modifier.clickable { onSetInterval(180) }
+                            )
+                        }
+                    }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Quiet Hours Frame (Defaults to ON, Clickable Sleep/Wake Time boxes open separate iPhone-style wheel popups)
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ComicSurfaceWhite)
-                    .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(14.dp)
-                    .testTag("card_quiet_hours")
-            ) {
-                Column {
+                // =============================================================
+                // CARD 3: QUIET HOURS
+                // =============================================================
+                Tactile3DCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("card_quiet_hours"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 24.dp,
+                    lipHeight = 3.dp,
+                    contentPadding = PaddingValues(18.dp)
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Bedtime,
-                                contentDescription = null,
-                                tint = ComicInkBlack,
-                                modifier = Modifier.size(22.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .background(SoftIndigoLight, shape = RoundedCornerShape(14.dp))
+                                    .border(width = 2.dp, color = SoftIndigoBorder, shape = RoundedCornerShape(14.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Text(
-                                    text = "QUIET HOURS (SLEEP MODE)",
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black),
-                                    color = ComicInkBlack
+                                    text = "☒",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SoftIndigo
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "QUIET HOURS",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.5.sp,
+                                        fontSize = 15.sp
+                                    ),
+                                    color = SoftTextPrimary
                                 )
                                 Text(
                                     text = if (uiState.quietHoursEnabled)
-                                        "Mutes from ${formatDisplayTime(uiState.quietStartHour, uiState.quietStartMinute)} to ${formatDisplayTime(uiState.quietEndHour, uiState.quietEndMinute)}"
+                                        "Sleep mode: Mutes ${String.format("%02d:%02d", uiState.quietStartHour, uiState.quietStartMinute)} to ${String.format("%02d:%02d", uiState.quietEndHour, uiState.quietEndMinute)}"
                                     else "Off (24/7 alerts)",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = ComicTextSecondary
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    ),
+                                    color = SoftTextMuted
                                 )
                             }
                         }
 
-                        Switch(
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        TactileToggleSwitch(
                             checked = uiState.quietHoursEnabled,
                             onCheckedChange = onToggleQuietHours,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.White,
-                                checkedTrackColor = ComicInkBlack
-                            ),
                             modifier = Modifier.testTag("switch_quiet_hours")
                         )
                     }
 
                     if (uiState.quietHoursEnabled) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
 
-                        // Separate Clickable Sleep Time & Wake Time Boxes
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Sleep Time Frame (Clickable -> Opens Sleep Time Picker)
-                            Box(
+                            // Sleep Time Card
+                            Tactile3DCard(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .border(width = 2.dp, color = ComicInkBlack)
-                                    .background(ComicSurfaceSubtle)
-                                    .clickable { activeTimePickerTarget = QuietTimePickerTarget.SLEEP }
-                                    .padding(vertical = 12.dp, horizontal = 10.dp)
                                     .testTag("btn_pick_sleep_time"),
-                                contentAlignment = Alignment.Center
+                                containerColor = SoftSurfaceSubtle,
+                                borderColor = SoftBorder,
+                                bottomLipColor = SoftBorder,
+                                cornerRadius = 18.dp,
+                                lipHeight = 3.5.dp,
+                                onClick = { activeTimePickerTarget = QuietTimePickerTarget.SLEEP },
+                                contentPadding = PaddingValues(12.dp)
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.Bedtime, contentDescription = null, modifier = Modifier.size(12.dp), tint = ComicTextSecondary)
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("SLEEP TIME", fontWeight = FontWeight.Black, color = ComicTextSecondary, fontSize = 10.sp)
-                                    }
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "☒ SLEEP TIME",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Black,
+                                            letterSpacing = 0.6.sp,
+                                            fontSize = 10.sp
+                                        ),
+                                        color = SoftTextSecondary
+                                    )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = String.format("%02d:%02d", uiState.quietStartHour, uiState.quietStartMinute),
-                                        fontWeight = FontWeight.Black,
-                                        color = ComicInkBlack,
-                                        fontSize = 18.sp,
-                                        letterSpacing = 0.5.sp
+                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 24.sp
+                                        ),
+                                        color = SoftTextPrimary
                                     )
                                     Text(
                                         text = formatDisplayTime(uiState.quietStartHour, uiState.quietStartMinute),
-                                        fontWeight = FontWeight.Bold,
-                                        color = ComicTextSecondary,
-                                        fontSize = 11.sp
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = SoftTextMuted
                                     )
                                 }
                             }
 
-                            // Wake Time Frame (Clickable -> Opens Wake Time Picker)
-                            Box(
+                            // Wake Time Card
+                            Tactile3DCard(
                                 modifier = Modifier
                                     .weight(1f)
-                                    .border(width = 2.dp, color = ComicInkBlack)
-                                    .background(ComicSurfaceSubtle)
-                                    .clickable { activeTimePickerTarget = QuietTimePickerTarget.WAKE }
-                                    .padding(vertical = 12.dp, horizontal = 10.dp)
                                     .testTag("btn_pick_wake_time"),
-                                contentAlignment = Alignment.Center
+                                containerColor = SoftSurfaceSubtle,
+                                borderColor = SoftBorder,
+                                bottomLipColor = SoftBorder,
+                                cornerRadius = 18.dp,
+                                lipHeight = 3.5.dp,
+                                onClick = { activeTimePickerTarget = QuietTimePickerTarget.WAKE },
+                                contentPadding = PaddingValues(12.dp)
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(Icons.Default.WbSunny, contentDescription = null, modifier = Modifier.size(12.dp), tint = ComicTextSecondary)
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("WAKE TIME", fontWeight = FontWeight.Black, color = ComicTextSecondary, fontSize = 10.sp)
-                                    }
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "☒ WAKE TIME",
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Black,
+                                            letterSpacing = 0.6.sp,
+                                            fontSize = 10.sp
+                                        ),
+                                        color = SoftTextSecondary
+                                    )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
                                         text = String.format("%02d:%02d", uiState.quietEndHour, uiState.quietEndMinute),
-                                        fontWeight = FontWeight.Black,
-                                        color = ComicInkBlack,
-                                        fontSize = 18.sp,
-                                        letterSpacing = 0.5.sp
+                                        style = MaterialTheme.typography.headlineMedium.copy(
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 24.sp
+                                        ),
+                                        color = SoftTextPrimary
                                     )
                                     Text(
                                         text = formatDisplayTime(uiState.quietEndHour, uiState.quietEndMinute),
-                                        fontWeight = FontWeight.Bold,
-                                        color = ComicTextSecondary,
-                                        fontSize = 11.sp
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 11.sp
+                                        ),
+                                        color = SoftTextMuted
                                     )
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(14.dp))
+                // =============================================================
+                // CARD 4: HAPTIC FEEDBACK
+                // =============================================================
+                Tactile3DCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 24.dp,
+                    lipHeight = 3.dp,
+                    contentPadding = PaddingValues(18.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .background(Color(0xFFECFDF5), shape = RoundedCornerShape(14.dp))
+                                    .border(width = 2.dp, color = Color(0xFFA7F3D0), shape = RoundedCornerShape(14.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "☒",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF059669)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "HAPTIC FEEDBACK",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.5.sp,
+                                        fontSize = 15.sp
+                                    ),
+                                    color = SoftTextPrimary
+                                )
+                                Text(
+                                    text = "3-short + 1-long vibration pattern",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = SoftTextMuted
+                                )
+                            }
+                        }
 
-            // Vibration Toggle Frame
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(ComicSurfaceWhite)
-                    .border(width = 2.dp, color = ComicInkBlack)
-                    .padding(14.dp)
-            ) {
-                Row(
+                        TactileToggleSwitch(
+                            checked = uiState.vibrateEnabled,
+                            onCheckedChange = onToggleVibration
+                        )
+                    }
+                }
+
+                // =============================================================
+                // CARD 5: DANGER ZONE
+                // =============================================================
+                Tactile3DCard(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxWidth()
+                        .testTag("card_danger_zone"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftRedBorder,
+                    bottomLipColor = SoftRedBorder,
+                    cornerRadius = 24.dp,
+                    lipHeight = 3.dp,
+                    contentPadding = PaddingValues(18.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Vibration,
-                            contentDescription = null,
-                            tint = ComicInkBlack,
-                            modifier = Modifier.size(22.dp)
+                        Text(
+                            text = "☒",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Black,
+                            color = SoftRed
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column {
-                            Text(
-                                text = "VIBRATE ON PUSH ROAST",
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black),
-                                color = ComicInkBlack
-                            )
-                            Text(
-                                text = "3-short + 1-long vibration pattern",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = ComicTextSecondary
-                            )
-                        }
-                    }
-
-                    Switch(
-                        checked = uiState.vibrateEnabled,
-                        onCheckedChange = onToggleVibration,
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = ComicInkBlack
-                        )
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // DANGER ZONE
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFFEF2F2))
-                    .border(width = 2.dp, color = ComicAccentRed)
-                    .padding(14.dp)
-                    .testTag("card_danger_zone")
-            ) {
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Warning,
-                            contentDescription = "Danger Zone",
-                            tint = ComicAccentRed,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "DANGER ZONE",
-                            style = MaterialTheme.typography.labelLarge.copy(
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp
+                                letterSpacing = 0.8.sp,
+                                fontSize = 12.sp
                             ),
-                            color = ComicAccentRed
+                            color = SoftRed
                         )
                     }
 
@@ -539,47 +711,61 @@ fun SettingsScreen(
 
                     Text(
                         text = "CLEAR ROAST COMPLETION BOOK",
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Black),
-                        color = ComicInkBlack
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = 0.4.sp,
+                            fontSize = 14.sp
+                        ),
+                        color = SoftTextPrimary
                     )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
                     Text(
                         text = "Reset all unlocked roasts and discovered secrets back to '???'. This action cannot be undone.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = ComicTextSecondary
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp
+                        ),
+                        color = SoftTextMuted
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                    Box(
+                    Tactile3DButton(
+                        onClick = { showConfirmClearDialog = true },
+                        containerColor = SoftRed,
+                        bottomLipColor = SoftRedShadow,
+                        borderColor = SoftRedShadow,
+                        cornerRadius = 16.dp,
+                        lipHeight = 4.5.dp,
+                        contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(ComicAccentRed)
-                            .clickable { showConfirmClearDialog = true }
-                            .padding(vertical = 12.dp)
-                            .testTag("btn_clear_roasts_book"),
-                        contentAlignment = Alignment.Center
+                            .testTag("btn_clear_roasts_book")
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.DeleteForever,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "RESET ROAST COMPLETION BOOK",
+                        Text(
+                            text = "☒",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "RESET ROAST COMPLETION BOOK",
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Black,
-                                color = Color.White,
                                 fontSize = 12.sp,
                                 letterSpacing = 0.5.sp
-                            )
-                        }
+                            ),
+                            color = Color.White
+                        )
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
     }
 
@@ -616,26 +802,27 @@ fun SettingsScreen(
                 Text(
                     text = "RESET ALL ROASTS?",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                    color = ComicAccentRed
+                    color = SoftRed
                 )
             },
             text = {
                 Text(
                     text = "Are you sure you want to clear your collection book? All unlocked roasts will be locked back to '???' and the secrets category will be hidden again.",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = ComicInkBlack
+                    color = SoftTextPrimary
                 )
             },
             confirmButton = {
-                Box(
-                    modifier = Modifier
-                        .background(ComicAccentRed)
-                        .clickable {
-                            onClearRoastsBook()
-                            showConfirmClearDialog = false
-                        }
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .testTag("btn_confirm_reset_roasts")
+                Tactile3DButton(
+                    onClick = {
+                        onClearRoastsBook()
+                        showConfirmClearDialog = false
+                    },
+                    containerColor = SoftRed,
+                    bottomLipColor = SoftRedShadow,
+                    cornerRadius = 14.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.testTag("btn_confirm_reset_roasts")
                 ) {
                     Text(
                         text = "YES, RESET EVERYTHING",
@@ -647,12 +834,11 @@ fun SettingsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showConfirmClearDialog = false }) {
-                    Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
                 }
             },
-            containerColor = ComicSurfaceWhite,
-            shape = RectangleShape
+            containerColor = SoftSurfaceWhite,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 }
-

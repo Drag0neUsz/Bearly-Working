@@ -1,0 +1,327 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Bearly Finished - Calendar &amp; Schedule</title>
+<!-- Google Fonts: Nunito -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" class="">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            nunito: ['Nunito', 'sans-serif'],
+          },
+          colors: {
+            duo: {
+              green: '#58cc02',
+              greenDark: '#46a302',
+              blue: '#1cb0f6',
+              blueDark: '#1899d6',
+              yellow: '#ffc800',
+              yellowDark: '#e5a500',
+              orange: '#ff9600',
+              cardBorder: '#e5e5e5',
+              grayBg: '#f7f7f7',
+              textMain: '#4b4b4b',
+              textMuted: '#afafaf',
+            }
+          },
+          boxShadow: {
+            'btn-green': '0 4px 0 #46a302',
+            'btn-blue': '0 3px 0 #1899d6',
+            'btn-white': '0 4px 0 #e5e5e5',
+            'btn-dark': '0 4px 0 #1e293b',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Custom Styles for Tactile Gamified Feel -->
+<style data-purpose="custom-styling">
+    body {
+      font-family: 'Nunito', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .pressable {
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+    .pressable:active {
+      transform: translateY(3px);
+      box-shadow: 0 0 0 transparent !important;
+    }
+    /* Hide scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-[#f0f2f5] flex justify-center items-center min-h-screen p-0 sm:p-4">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="w-full max-w-[390px] h-[844px] bg-[#fbf9f8] flex flex-col relative overflow-hidden shadow-2xl rounded-none sm:rounded-[44px] border-0 sm:border-[8px] sm:border-slate-800" data-purpose="mobile-viewport-container">
+<!-- BEGIN: iOSStatusBar -->
+<div class="w-full pt-3 px-7 pb-2 flex justify-between items-center text-slate-800 text-xs font-black z-20 shrink-0" data-purpose="status-bar">
+<span class="">9:41</span>
+<div class="flex items-center space-x-1.5">
+<!-- Signal Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25C2.89 16.51 2 14.36 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10c0 2.36-.89 4.51-2.35 6.25l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9zm0 4c-2.76 0-5 2.24-5 5 0 1.34.53 2.56 1.39 3.46l.71-.71C8.42 14.07 8 13.08 8 12c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.08-.42 2.07-1.1 2.75l.71.71C16.47 14.56 17 13.34 17 12c0-2.76-2.24-5-5-5zm0 4c-.55 0-1 .45-1 1 0 .28.11.53.29.71l.71.71c.18-.18.29-.43.29-.71 0-.55-.45-1-1-1z"></path></svg>
+<!-- Wifi Icon -->
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.5 0 6.69 1.4 9.02 3.66L12 19.34 2.98 11.16C5.31 8.9 8.5 7.5 12 7.5z"></path></svg>
+<!-- Battery Icon -->
+<div class="w-5 h-2.5 border-2 border-slate-800 rounded-sm flex items-center p-0.5">
+<div class="h-full w-full bg-slate-800 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- END: iOSStatusBar -->
+<!-- Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto px-4 pb-24 pt-1 space-y-3.5" data-purpose="main-scroll-content">
+<!-- BEGIN: HeaderSection -->
+<section class="flex items-center justify-between pt-1" data-purpose="header">
+<div>
+<h1 class="text-xl font-black text-slate-800 tracking-tight">Calendar &amp; Schedule</h1>
+<p class="text-xs font-bold text-[#94a3b8] tracking-wider" style="opacity: 0;">Browse &amp; schedule past &amp; future dates</p>
+</div>
+<!-- Chunky 3D TODAY shortcut button -->
+<button class="pressable px-3 py-1.5 bg-[#1cb0f6] hover:bg-[#1899d6] text-white font-extrabold text-xs rounded-xl border-b-4 border-[#1899d6] shadow-sm uppercase tracking-wide flex items-center gap-1 active:border-b-0">
+<span class="">Today</span>
+</button>
+</section>
+<!-- END: HeaderSection -->
+<!-- BEGIN: MonthNavigatorCard -->
+<section class="bg-white rounded-2xl border-2 border-[#e5e5e5] p-2.5 shadow-sm" data-purpose="month-navigator">
+<div class="flex items-center justify-between">
+<!-- Previous Month Button -->
+<button aria-label="Previous month" class="pressable w-9 h-9 flex items-center justify-center rounded-xl bg-[#f7f7f7] border-2 border-[#e5e5e5] border-b-4 active:border-b-2 text-[#777777] font-black text-sm hover:bg-[#eeeeee]">
+<svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<!-- Current Month Badge -->
+<div class="flex items-center space-x-2 px-4 py-1.5 bg-[#f0f9ff] border-2 border-[#bae6fd] rounded-full border-b-4">
+<span class="text-base font-black text-[#0284c7] tracking-wider uppercase">October 2026</span>
+</div>
+<!-- Next Month Button -->
+<button aria-label="Next month" class="pressable w-9 h-9 flex items-center justify-center rounded-xl bg-[#f7f7f7] border-2 border-[#e5e5e5] border-b-4 active:border-b-2 text-[#777777] font-black text-sm hover:bg-[#eeeeee]">
+<svg class="w-4 h-4 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+</section>
+<!-- END: MonthNavigatorCard -->
+<!-- BEGIN: CalendarGridCard -->
+<section class="bg-white rounded-2xl border-2 border-[#e5e5e5] p-3 shadow-sm" data-purpose="calendar-grid-card">
+<!-- Day of Week Headers -->
+<div class="grid grid-cols-7 text-center font-black text-[11px] mb-2 text-[#afafaf]">
+<span class="text-[#ff4b4b]">SUN</span>
+<span class="">MON</span>
+<span class="">TUE</span>
+<span class="">WED</span>
+<span class="">THU</span>
+<span class="">FRI</span>
+<span class="text-[#ff9600]">SAT</span>
+</div>
+<!-- Days Grid -->
+<div class="grid grid-cols-7 gap-1 text-center font-black text-xs">
+<!-- Empty Leading Days (Sun-Wed before Oct 1) -->
+<div class="h-9"></div>
+<div class="h-9"></div>
+<div class="h-9"></div>
+<div class="h-9"></div>
+<!-- Week 1 -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">1</span>
+<span class="w-1 h-1 bg-transparent rounded-full"></span>
+</div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">2</span>
+<span class="w-1 h-1 bg-transparent rounded-full"></span>
+</div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">3</span>
+<span class="w-1 h-1 bg-transparent rounded-full"></span>
+</div>
+<!-- Week 2 -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">4</span>
+</div>
+<!-- Day 5 with Streak Dot -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl bg-[#f0fdf4] text-[#15803d] cursor-pointer border border-[#bbf7d0]">
+<span class="">5</span>
+<span class="w-1.5 h-1.5 bg-[#58cc02] rounded-full"></span>
+</div>
+<!-- Day 6 with Streak Dot -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl bg-[#f0fdf4] text-[#15803d] cursor-pointer border border-[#bbf7d0]">
+<span class="">6</span>
+<span class="w-1.5 h-1.5 bg-[#58cc02] rounded-full"></span>
+</div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">7</span>
+</div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">8</span>
+</div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">9</span>
+</div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer">
+<span class="">10</span>
+</div>
+<!-- Week 3 -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">11</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">12</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">13</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">14</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">15</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">16</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">17</span></div>
+<!-- Week 4 -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">18</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">19</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">20</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">21</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">22</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">23</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">24</span></div>
+<!-- Week 5 -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">25</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">26</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">27</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">28</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">29</span></div>
+<div class="h-9 flex flex-col items-center justify-center rounded-xl hover:bg-slate-100 text-[#4b4b4b] cursor-pointer"><span class="">30</span></div>
+<!-- Selected Day (31) - Chunky Navy/Duolingo Active style -->
+<div class="h-9 flex flex-col items-center justify-center rounded-xl bg-[#0f172a] text-white font-extrabold border-b-4 border-[#020617] cursor-pointer relative shadow-sm">
+<span class="">31</span>
+<span class="w-1.5 h-1.5 bg-[#58cc02] rounded-full mt-0.5"></span>
+</div>
+</div>
+</section>
+<!-- END: CalendarGridCard -->
+<!-- BEGIN: MonthlyScorecard -->
+<section class="bg-white rounded-2xl border-2 border-[#e5e5e5] p-3 shadow-sm" data-purpose="monthly-scorecard">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-sm">emoji_events</span>
+<span class="text-xs font-black uppercase text-[#4b4b4b] tracking-wider">October 2026 Scorecard</span>
+</div>
+<span class="text-xs font-black text-[#58cc02] bg-[#f0fdf4] px-2 py-0.5 rounded-full border border-[#bbf7d0] border-b-2">
+            0 / 0 Done (0%)
+          </span>
+</div>
+<!-- Tactile Gamified Progress Bar -->
+<div class="w-full h-4 bg-[#e5e5e5] rounded-full p-0.5 overflow-hidden flex items-center relative">
+<!-- Active fill line -->
+<div class="h-full w-2/12 bg-gradient-to-r from-[#58cc02] to-[#7be329] rounded-full relative">
+
+</div>
+<!-- Sparkle / Star milestone indicator -->
+
+</div>
+</section>
+<!-- END: MonthlyScorecard -->
+<!-- BEGIN: SelectedDateActionCard -->
+<section class="bg-white rounded-2xl border-2 border-[#e5e5e5] p-3.5 shadow-sm space-y-3" data-purpose="selected-date-card">
+<!-- Date Header & Status Badge -->
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="bg-[#0f172a] text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md border-b-2 border-black tracking-wider">
+              Today
+            </span>
+<span class="text-xs font-black text-[#334155] tracking-tight">Saturday, October 31, 2026</span>
+</div>
+<!-- Counter Pill -->
+<span class="text-xs font-black text-[#afafaf] bg-[#f7f7f7] border-2 border-[#e5e5e5] px-2.5 py-0.5 rounded-full border-b-4">
+            0 / 0
+          </span>
+</div>
+<!-- Playful Mascot Status Message -->
+<div class="bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-2.5 flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-full bg-[#fef3c7] border border-[#fde68a] flex items-center justify-center text-lg shrink-0"><span class="text-lg font-black text-[#ff9600] leading-none flex items-center justify-center">☒</span></div>
+<p class="text-xs font-bold text-[#64748b] leading-tight">
+            Nothing scheduled for today. The bear is resting peacefully!
+          </p>
+</div>
+<!-- Dual Chunky Action Buttons -->
+<div class="grid grid-cols-2 gap-2.5 pt-0.5">
+<!-- Sync Device Cal Button -->
+<button class="pressable w-full py-2.5 bg-white hover:bg-slate-50 text-[#475569] font-black text-xs rounded-xl border-2 border-[#cbd5e1] border-b-4 border-b-[#94a3b8] active:border-b-2 flex items-center justify-center space-x-1.5 shadow-sm">
+<span class="text-base font-black leading-none">☒</span>
+<span class="">Sync Cal</span>
+</button>
+<!-- Add Commitment Button -->
+<button class="pressable w-full py-2.5 bg-[#58cc02] hover:bg-[#4eb702] text-white font-black text-xs rounded-xl border-2 border-[#46a302] border-b-4 border-b-[#388501] active:border-b-2 flex items-center justify-center space-x-1.5 shadow-sm">
+<span class="material-symbols-outlined text-base">add</span>
+<span class="">Add Task</span>
+</button>
+</div>
+</section>
+<!-- END: SelectedDateActionCard -->
+<!-- BEGIN: CommitmentsEmptyStateCard -->
+<section class="bg-white rounded-2xl border-2 border-[#e5e5e5] p-5 shadow-sm text-center relative overflow-hidden" data-purpose="empty-state-card">
+<!-- Floating Decorative Plus Action (Duolingo style floating button) -->
+<button class="pressable absolute right-3 bottom-3 w-10 h-10 bg-[#0f172a] hover:bg-slate-800 text-white rounded-xl border-b-4 border-black flex items-center justify-center shadow-md active:border-b-0">
+<svg class="w-5 h-5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+<!-- Big Fun Icon -->
+<div class="w-14 h-14 mx-auto mb-2 bg-[#f0f9ff] border-2 border-[#bae6fd] rounded-2xl flex items-center justify-center text-2xl shadow-inner"><span class="material-symbols-outlined text-2xl text-[#0284c7]">calendar_month</span></div>
+<!-- Headline & Description -->
+<h3 class="text-sm font-extrabold text-[#334155] uppercase tracking-wide">No commitments for this date</h3>
+<p class="text-xs font-bold text-[#94a3b8] mt-0.5 max-w-[220px] mx-auto">
+          Plan ahead or log your friendly micro-goals for this date!
+        </p>
+</section>
+<!-- END: CommitmentsEmptyStateCard -->
+</main>
+<!-- BEGIN: DuolingoBottomNavBar -->
+<nav class="absolute bottom-0 left-0 right-0 bg-white border-t-2 border-duo-border px-3 pt-2 pb-5 z-30 flex justify-around items-center" data-purpose="bottom-navigation-bar">
+<!-- Tab 1: Today -->
+<button class="flex flex-col items-center justify-center text-[#afafaf] hover:text-[#777777] w-16 py-1 transition-colors group">
+<div class="w-7 h-7 flex items-center justify-center"><svg class="w-6 h-6 stroke-current" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8.5 12.5l2.5 2.5 5-5"></path></svg></div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1">Today</span>
+</button>
+<!-- Tab 2: Calendar (ACTIVE Tab) -->
+<button class="flex flex-col items-center justify-center text-[#58cc02] w-18 py-1 transition-all relative">
+<div class="w-8 h-8 rounded-2xl bg-[#f0fdf4] border-2 border-[#58cc02] flex items-center justify-center text-[#58cc02] shadow-[0_2px_0_#46a302]">
+<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"></path><circle cx="8" cy="14" r="1.2"></circle><circle cx="12" cy="14" r="1.2"></circle><circle cx="16" cy="14" r="1.2"></circle></svg>
+</div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1 text-[#58cc02]">Calendar</span>
+</button>
+<!-- Tab 3: Roasts -->
+<button class="flex flex-col items-center justify-center text-[#afafaf] hover:text-[#777777] w-16 py-1 transition-colors group">
+<div class="w-7 h-7 flex items-center justify-center">
+<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+<path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1">Roasts</span>
+</button>
+<!-- Tab 4: Settings -->
+<button class="flex flex-col items-center justify-center text-[#afafaf] hover:text-[#777777] w-16 py-1 transition-colors group">
+<div class="w-7 h-7 flex items-center justify-center">
+<svg class="w-6 h-6 stroke-current" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="3"></circle>
+<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-black uppercase tracking-wider mt-1">Settings</span>
+</button>
+</nav>
+<!-- END: DuolingoBottomNavBar -->
+<!-- iOS Home Indicator Pill -->
+<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-32 h-1 bg-slate-300 rounded-full z-40 pointer-events-none"></div>
+</div>
+<!-- END: MobileDeviceFrame -->
+
+
+
+
+
+
+
+
+
+
+</body></html>

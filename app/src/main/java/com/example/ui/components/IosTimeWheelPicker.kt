@@ -7,17 +7,17 @@ import android.os.Vibrator
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
@@ -29,11 +29,6 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.theme.*
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-/**
- * Reusable iPhone Alarm-style drum wheel time picker.
- * Can be embedded directly inside any layout or dialog.
- * Emits a very slight single vibration tick on every single number scrolled!
- */
 @Composable
 fun IosTimeWheelPicker(
     selectedHour: Int,
@@ -56,7 +51,7 @@ fun IosTimeWheelPicker(
                 Text(
                     text = "HOUR (00-23)",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                    color = ComicTextSecondary,
+                    color = SoftTextSecondary,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
@@ -64,7 +59,7 @@ fun IosTimeWheelPicker(
                 Text(
                     text = "MIN (00-59)",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                    color = ComicTextSecondary,
+                    color = SoftTextSecondary,
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center
                 )
@@ -72,31 +67,31 @@ fun IosTimeWheelPicker(
             Spacer(modifier = Modifier.height(6.dp))
         }
 
-        // iPhone-style Drum Wheel Container
+        val containerShape = RoundedCornerShape(18.dp)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height)
-                .background(Color(0xFFF1F5F9))
-                .border(width = 2.dp, color = ComicInkBlack),
+                .background(Color(0xFFF8FAFC), shape = containerShape)
+                .border(width = 2.dp, color = SoftBorder, shape = containerShape)
+                .clip(containerShape),
             contentAlignment = Alignment.Center
         ) {
-            // Center Selection Highlight Band (Between top and bottom divider lines like iOS picker)
+            // Center Selection Highlight Band
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
                     .height(48.dp)
-                    .background(Color.White)
-                    .border(width = 1.5.dp, color = ComicInkBlack)
+                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+                    .border(width = 2.dp, color = SoftGreenBorder, shape = RoundedCornerShape(12.dp))
             )
 
-            // Columns: Hours : Minutes
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                // Hour Wheel Column
                 WheelColumn(
                     range = 0..23,
                     initialValue = selectedHour,
@@ -104,18 +99,16 @@ fun IosTimeWheelPicker(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Center Colon Divider
                 Text(
                     text = ":",
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Black,
-                        fontSize = 28.sp
+                        fontSize = 26.sp
                     ),
-                    color = ComicInkBlack,
+                    color = SoftTextPrimary,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )
 
-                // Minute Wheel Column
                 WheelColumn(
                     range = 0..59,
                     initialValue = selectedMinute,
@@ -127,10 +120,6 @@ fun IosTimeWheelPicker(
     }
 }
 
-/**
- * Single Wheel Column for iPhone style drum picker.
- * Emits a very slight single vibration tick when scrolling past each number!
- */
 @Composable
 fun WheelColumn(
     range: IntRange,
@@ -147,7 +136,6 @@ fun WheelColumn(
     val context = LocalContext.current
     var isInitialLaunch by remember { mutableStateOf(true) }
 
-    // Trigger very slight single vibration after every number scrolls
     LaunchedEffect(listState) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .distinctUntilChanged()
@@ -158,7 +146,6 @@ fun WheelColumn(
                     if (isInitialLaunch) {
                         isInitialLaunch = false
                     } else {
-                        // Very slight single tick vibration on scroll
                         try {
                             view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
                             @Suppress("DEPRECATION")
@@ -185,7 +172,7 @@ fun WheelColumn(
         LazyColumn(
             state = listState,
             flingBehavior = flingBehavior,
-            contentPadding = PaddingValues(vertical = 48.dp), // Centers the selected 48dp row
+            contentPadding = PaddingValues(vertical = 48.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             items(itemsList.size) { index ->
@@ -204,7 +191,7 @@ fun WheelColumn(
                             fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
                             fontSize = if (isSelected) 24.sp else 18.sp
                         ),
-                        color = if (isSelected) ComicInkBlack else ComicTextMuted.copy(alpha = 0.45f)
+                        color = if (isSelected) SoftGreenText else SoftTextMuted.copy(alpha = 0.55f)
                     )
                 }
             }
@@ -212,10 +199,6 @@ fun WheelColumn(
     }
 }
 
-/**
- * iPhone Alarm Style Scrollable Hour:Minute Wheel Picker Dialog.
- * Vibrates slightly on every single number scrolled!
- */
 @Composable
 fun IosAlarmStyleWheelTimeDialog(
     title: String,
@@ -243,18 +226,20 @@ fun IosAlarmStyleWheelTimeDialog(
                     text = title,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp
+                        letterSpacing = 0.6.sp
                     ),
-                    color = ComicInkBlack
+                    color = SoftTextPrimary
                 )
-                Box(
-                    modifier = Modifier
-                        .background(ComicInkBlack)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                Tactile3DBadge(
+                    containerColor = SoftGreenLight,
+                    borderColor = SoftGreenBorder,
+                    bottomLipColor = SoftGreenBorder,
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
                         text = liveDisplayFormatted,
-                        color = Color.White,
+                        color = SoftGreenText,
                         fontWeight = FontWeight.Black,
                         fontSize = 12.sp
                     )
@@ -271,7 +256,7 @@ fun IosAlarmStyleWheelTimeDialog(
                 Text(
                     text = "Scroll wheels to set time. Ticks with subtle vibration.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = ComicTextSecondary,
+                    color = SoftTextSecondary,
                     textAlign = TextAlign.Center
                 )
 
@@ -287,22 +272,23 @@ fun IosAlarmStyleWheelTimeDialog(
             }
         },
         confirmButton = {
-            Box(
-                modifier = Modifier
-                    .background(ComicInkBlack)
-                    .clickable { onConfirm(selectedHour, selectedMinute) }
-                    .padding(horizontal = 18.dp, vertical = 10.dp)
-                    .testTag("btn_confirm_wheel_time")
+            Tactile3DButton(
+                onClick = { onConfirm(selectedHour, selectedMinute) },
+                containerColor = SoftGreen,
+                bottomLipColor = SoftGreenShadow,
+                cornerRadius = 14.dp,
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 10.dp),
+                modifier = Modifier.testTag("btn_confirm_wheel_time")
             ) {
                 Text("DONE", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
             }
         },
-        containerColor = ComicSurfaceWhite,
-        shape = RectangleShape
+        containerColor = SoftSurfaceWhite,
+        shape = RoundedCornerShape(24.dp)
     )
 }

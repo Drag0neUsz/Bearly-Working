@@ -7,30 +7,27 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ScheduleItem
-import com.example.ui.components.IosTimeWheelPicker
-import com.example.ui.components.SavageBearView
-import com.example.ui.components.ScheduleItemCard
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.SavageUiState
 import com.example.ui.viewmodel.TaskFilter
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,30 +46,37 @@ fun HomeScreen(
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<ScheduleItem?>(null) }
-    val todayFormatted = remember {
-        SimpleDateFormat("EEEE, MMMM d", Locale.getDefault()).format(Date()).uppercase()
+
+    // Streak counter derived from real progress
+    val completedDaysStreak = remember(uiState.allItems, uiState.completedCount) {
+        val completedDatesCount = uiState.allItems
+            .groupBy { it.dateString }
+            .count { (_, dayList) -> dayList.isNotEmpty() && dayList.all { it.isCompleted } }
+        (completedDatesCount + if (uiState.completedCount > 0) 1 else 0).coerceAtLeast(1)
     }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = ComicWhiteBg,
+        containerColor = SoftCanvasBg,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
-            // Sharp rectangular Action Button
-            Box(
+            // Chunky 3D Electric Sky Blue Floating Action Button
+            Tactile3DButton(
+                onClick = { showAddDialog = true },
+                containerColor = SoftBlue,
+                bottomLipColor = SoftBlueShadow,
+                cornerRadius = 18.dp,
+                lipHeight = 4.dp,
+                contentPadding = PaddingValues(0.dp),
                 modifier = Modifier
-                    .size(52.dp)
-                    .background(ComicInkBlack, shape = RectangleShape)
-                    .border(width = 2.dp, color = ComicInkBlack, shape = RectangleShape)
-                    .clickable { showAddDialog = true }
-                    .testTag("fab_add_task"),
-                contentAlignment = Alignment.Center
+                    .size(56.dp)
+                    .testTag("fab_add_task")
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Schedule Item",
                     tint = Color.White,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(30.dp)
                 )
             }
         }
@@ -81,85 +85,139 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 68.dp)
+            contentPadding = PaddingValues(bottom = 84.dp)
         ) {
-            // Top Bar Frame (Clean, automatic sync in background, NO manual sync button!)
+            // Top Stats Bar (Streak Badge + Calendar Sync Status Pill — Honey badge removed)
             item {
-                Box(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(ComicSurfaceWhite)
-                        .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .background(SoftSurfaceWhite)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        // Streak Pill Badge with Unicode Ballot Box
+                        Tactile3DBadge(
+                            containerColor = SoftOrangeLight,
+                            borderColor = SoftOrangeBorder,
+                            bottomLipColor = SoftOrangeBorder,
+                            shape = CircleShape,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 5.dp)
+                        ) {
                             Text(
-                                text = "BEARLY FINISHED",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.5.sp,
-                                    fontSize = 20.sp
-                                ),
-                                color = ComicInkBlack
+                                text = "☒",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Black,
+                                color = SoftOrangeText
                             )
+                            Spacer(modifier = Modifier.width(5.dp))
                             Text(
-                                text = todayFormatted,
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.8.sp
+                                text = "$completedDaysStreak",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 14.sp
                                 ),
-                                color = ComicTextSecondary
+                                color = SoftOrangeText
                             )
                         }
 
-                        // Status pill showing auto-synced status
+                        // Sync Active Status Pill
                         if (uiState.isAutoSyncing) {
-                            Text(
-                                text = "AUTO-SYNCING...",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 0.5.sp,
-                                    fontSize = 10.sp
-                                ),
-                                color = ComicAccentRed
-                            )
-                        } else if (uiState.hasCalendarPermission) {
-                            Box(
-                                modifier = Modifier
-                                    .border(width = 1.dp, color = ComicBorderSubtle)
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                            Tactile3DBadge(
+                                containerColor = SoftBlueLight,
+                                borderColor = SoftBlueBorder,
+                                bottomLipColor = SoftBlueBorder,
+                                shape = CircleShape,
+                                contentPadding = PaddingValues(horizontal = 11.dp, vertical = 5.dp)
                             ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(SoftBlue, shape = CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "CALENDAR CONNECTED",
+                                    text = "SYNCING...",
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 9.sp,
-                                        letterSpacing = 0.5.sp
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 10.sp
                                     ),
-                                    color = ComicTextSecondary
+                                    color = SoftBlueText
+                                )
+                            }
+                        } else if (uiState.hasCalendarPermission) {
+                            Tactile3DBadge(
+                                containerColor = SoftGreenLight,
+                                borderColor = SoftGreenBorder,
+                                bottomLipColor = SoftGreenBorder,
+                                shape = CircleShape,
+                                contentPadding = PaddingValues(horizontal = 11.dp, vertical = 5.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(SoftGreen, shape = CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "SYNC ACTIVE",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 10.sp,
+                                        letterSpacing = 0.6.sp
+                                    ),
+                                    color = SoftGreenText
+                                )
+                            }
+                        } else {
+                            Tactile3DBadge(
+                                containerColor = Color(0xFFF1F5F9),
+                                borderColor = SoftBorder,
+                                bottomLipColor = SoftBorder,
+                                shape = CircleShape,
+                                onClick = onRequestCalendarPermission,
+                                contentPadding = PaddingValues(horizontal = 11.dp, vertical = 5.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .background(SoftOrange, shape = CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "SYNC OFF",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 10.sp
+                                    ),
+                                    color = SoftTextSecondary
                                 )
                             }
                         }
                     }
+
+                    HorizontalDivider(thickness = 2.dp, color = Color(0xFFF1F5F9))
                 }
             }
 
-            // Calendar Permission Warning Frame (Full Width Frame)
+            // Calendar Permission Warning Banner
             item {
                 AnimatedVisibility(visible = !uiState.hasCalendarPermission) {
-                    Box(
+                    Tactile3DCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 6.dp)
-                            .background(Color(0xFFFEF3C7))
-                            .border(width = 2.dp, color = ComicInkBlack)
-                            .padding(12.dp)
-                            .testTag("banner_calendar_permission")
+                            .testTag("banner_calendar_permission"),
+                        containerColor = SoftYellowLight,
+                        borderColor = SoftYellowBorder,
+                        bottomLipColor = SoftYellowBorder,
+                        cornerRadius = 20.dp,
+                        contentPadding = PaddingValues(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -168,7 +226,7 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.CalendarMonth,
                                 contentDescription = null,
-                                tint = ComicInkBlack,
+                                tint = SoftYellowText,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -176,20 +234,22 @@ fun HomeScreen(
                                 Text(
                                     text = "CONNECT DEVICE CALENDAR",
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                                    color = ComicInkBlack
+                                    color = SoftTextPrimary
                                 )
                                 Text(
-                                    text = "Auto-pulls today's events on startup without manual tapping.",
+                                    text = "Auto-pulls today's events on startup.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = ComicInkBlack
+                                    color = SoftTextSecondary
                                 )
                             }
-                            Box(
-                                modifier = Modifier
-                                    .background(ComicInkBlack)
-                                    .clickable(onClick = onRequestCalendarPermission)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                                    .testTag("btn_grant_calendar")
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Tactile3DButton(
+                                onClick = onRequestCalendarPermission,
+                                containerColor = SoftOrange,
+                                bottomLipColor = SoftOrangeShadow,
+                                cornerRadius = 12.dp,
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                                modifier = Modifier.testTag("btn_grant_calendar")
                             ) {
                                 Text(
                                     text = "GRANT",
@@ -202,17 +262,19 @@ fun HomeScreen(
                 }
             }
 
-            // Notification Permission Warning Frame (Full Width Frame)
+            // Notification Permission Warning Banner
             item {
                 AnimatedVisibility(visible = !uiState.hasNotificationPermission) {
-                    Box(
+                    Tactile3DCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .background(Color(0xFFFEE2E2))
-                            .border(width = 2.dp, color = ComicAccentRed)
-                            .padding(12.dp)
-                            .testTag("banner_notification_permission")
+                            .testTag("banner_notification_permission"),
+                        containerColor = SoftRedLight,
+                        borderColor = SoftRedBorder,
+                        bottomLipColor = SoftRedBorder,
+                        cornerRadius = 20.dp,
+                        contentPadding = PaddingValues(12.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -221,7 +283,7 @@ fun HomeScreen(
                             Icon(
                                 imageVector = Icons.Default.NotificationsActive,
                                 contentDescription = null,
-                                tint = ComicAccentRed,
+                                tint = SoftRed,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -229,20 +291,22 @@ fun HomeScreen(
                                 Text(
                                     text = "NOTIFICATIONS DISABLED",
                                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                                    color = ComicAccentRed
+                                    color = SoftRed
                                 )
                                 Text(
                                     text = "Required for the bear to poke you when slacking.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = ComicInkBlack
+                                    color = SoftTextSecondary
                                 )
                             }
-                            Box(
-                                modifier = Modifier
-                                    .background(ComicAccentRed)
-                                    .clickable(onClick = onRequestNotificationPermission)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
-                                    .testTag("btn_grant_notifications")
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Tactile3DButton(
+                                onClick = onRequestNotificationPermission,
+                                containerColor = SoftRed,
+                                bottomLipColor = SoftRedShadow,
+                                cornerRadius = 12.dp,
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                                modifier = Modifier.testTag("btn_grant_notifications")
                             ) {
                                 Text(
                                     text = "ENABLE",
@@ -255,8 +319,9 @@ fun HomeScreen(
                 }
             }
 
-            // Savage Bear Companion Section (Talking animation synced with letters appearing!)
+            // Mascot & Speech Bubble Section
             item {
+                Spacer(modifier = Modifier.height(6.dp))
                 SavageBearView(
                     quote = uiState.bearQuote,
                     completedRatio = uiState.completionRatio,
@@ -265,204 +330,238 @@ fun HomeScreen(
                 )
             }
 
-            // Scorecard (Full-Width Sharp Frame)
+            // Daily Scorecard Card
             item {
-                Box(
+                Tactile3DCard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .background(ComicSurfaceWhite)
-                        .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(14.dp)
-                        .testTag("card_progress_summary")
+                        .testTag("card_progress_summary"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = Color(0xFFE2E8F0),
+                    bottomLipColor = Color(0xFFE2E8F0),
+                    cornerRadius = 24.dp,
+                    contentPadding = PaddingValues(16.dp)
                 ) {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = "DAILY SCORECARD",
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.sp
-                                ),
-                                color = ComicInkBlack
-                            )
-                            Text(
-                                text = "${uiState.completedCount} / ${uiState.totalCount} COMPLETED",
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Black
-                                ),
-                                color = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) ComicAccentGreen else ComicInkBlack
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        // Sharp Progress Indicator
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(12.dp)
-                                .background(ComicSurfaceSubtle)
-                                .border(width = 1.5.dp, color = ComicInkBlack)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(fraction = uiState.completionRatio.coerceIn(0f, 1f))
-                                    .background(if (uiState.completionRatio >= 1f) ComicAccentGreen else ComicInkBlack)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
-                            text = when {
-                                uiState.totalCount == 0 -> "NO TASKS SCHEDULED. THE BEAR IS WATCHING."
-                                uiState.completionRatio >= 1f -> "🎉 ALL TASKS COMPLETE! REMINDERS PAUSED FOR TODAY."
-                                else -> "⚠️ ${uiState.pendingCount} TASK(S) REMAINING. REMINDER EVERY ${uiState.notificationIntervalMinutes} MIN."
-                            },
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp
+                            text = "DAILY SCORECARD",
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 0.6.sp,
+                                fontSize = 14.sp
                             ),
-                            color = if (uiState.completionRatio >= 1f) ComicAccentGreen else ComicTextSecondary
+                            color = Color(0xFF1E293B)
                         )
+
+                        Tactile3DBadge(
+                            containerColor = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftGreenLight else Color(0xFFF1F5F9),
+                            borderColor = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftGreenBorder else Color(0xFFE2E8F0),
+                            bottomLipColor = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftGreenBorder else Color(0xFFE2E8F0),
+                            shape = CircleShape,
+                            lipHeight = 2.dp,
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "${uiState.completedCount} / ${uiState.totalCount} Completed",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                ),
+                                color = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftGreenText else Color(0xFF475569)
+                            )
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Chunky Glossy Progress Bar + Milestone Ballot Box Badge
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        TactileGlossyProgressBar(
+                            progress = uiState.completionRatio,
+                            modifier = Modifier.weight(1f),
+                            height = 16.dp
+                        )
+
+                        // Milestone Reward Badge with Ballot Box
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .background(
+                                    color = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftYellow else Color(0xFFFEF3C7),
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = 2.dp,
+                                    color = Color(0xFFFCD34D),
+                                    shape = CircleShape
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "☒",
+                                color = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) Color.White else Color(0xFFF59E0B),
+                                fontWeight = FontWeight.Black,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = when {
+                            uiState.totalCount == 0 -> "☒ No tasks scheduled. The bear is watching!"
+                            uiState.completionRatio >= 1f -> "☒ All tasks complete! Reminders paused for today."
+                            else -> "☒ ${uiState.pendingCount} task(s) remaining. Reminder every ${uiState.notificationIntervalMinutes} min."
+                        },
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 12.sp
+                        ),
+                        color = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftGreenText else Color(0xFF94A3B8),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
 
-            // Full-Width Sharp Segmented Filter Bar
+            // Segmented Filter Tabs (All / Pending / Done)
             item {
+                val navShape = RoundedCornerShape(18.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .border(width = 2.dp, color = ComicInkBlack)
+                        .background(Color(0xFFF1F5F9), shape = navShape)
+                        .border(width = 2.dp, color = Color(0xFFE2E8F0), shape = navShape)
+                        .padding(5.dp)
                 ) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        val isAllSelected = uiState.filter == TaskFilter.ALL
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(if (isAllSelected) ComicInkBlack else ComicSurfaceWhite)
-                                .clickable { onSetFilter(TaskFilter.ALL) }
-                                .padding(vertical = 10.dp)
-                                .testTag("filter_all"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "ALL (${uiState.totalCount})",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                                color = if (isAllSelected) Color.White else ComicInkBlack
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .width(2.dp)
-                                .height(40.dp)
-                                .background(ComicInkBlack)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        FilterTabButton(
+                            label = "All (${uiState.totalCount})",
+                            isSelected = uiState.filter == TaskFilter.ALL,
+                            onClick = { onSetFilter(TaskFilter.ALL) },
+                            testTag = "filter_all",
+                            modifier = Modifier.weight(1f)
                         )
 
-                        val isPendingSelected = uiState.filter == TaskFilter.PENDING
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(if (isPendingSelected) ComicInkBlack else ComicSurfaceWhite)
-                                .clickable { onSetFilter(TaskFilter.PENDING) }
-                                .padding(vertical = 10.dp)
-                                .testTag("filter_pending"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "PENDING (${uiState.pendingCount})",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                                color = if (isPendingSelected) Color.White else ComicInkBlack
-                            )
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .width(2.dp)
-                                .height(40.dp)
-                                .background(ComicInkBlack)
+                        FilterTabButton(
+                            label = "Pending (${uiState.pendingCount})",
+                            isSelected = uiState.filter == TaskFilter.PENDING,
+                            onClick = { onSetFilter(TaskFilter.PENDING) },
+                            testTag = "filter_pending",
+                            modifier = Modifier.weight(1f)
                         )
 
-                        val isDoneSelected = uiState.filter == TaskFilter.COMPLETED
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(if (isDoneSelected) ComicAccentGreen else ComicSurfaceWhite)
-                                .clickable { onSetFilter(TaskFilter.COMPLETED) }
-                                .padding(vertical = 10.dp)
-                                .testTag("filter_completed"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "DONE (${uiState.completedCount})",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                                color = if (isDoneSelected) Color.White else ComicInkBlack
-                            )
-                        }
+                        FilterTabButton(
+                            label = "Done (${uiState.completedCount})",
+                            isSelected = uiState.filter == TaskFilter.COMPLETED,
+                            onClick = { onSetFilter(TaskFilter.COMPLETED) },
+                            testTag = "filter_completed",
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
 
-            // Empty State (Full-Width Sharp Frame - NO sync button)
+            // Empty State Card
             if (uiState.filteredItems.isEmpty()) {
                 item {
-                    Box(
+                    Tactile3DCard(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .background(ComicSurfaceWhite)
-                            .border(width = 2.dp, color = ComicInkBlack)
-                            .padding(24.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                             .testTag("empty_state_card"),
-                        contentAlignment = Alignment.Center
+                        containerColor = SoftSurfaceWhite,
+                        borderColor = Color(0xFFE2E8F0),
+                        bottomLipColor = Color(0xFFE2E8F0),
+                        cornerRadius = 24.dp,
+                        contentPadding = PaddingValues(24.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.EventBusy,
-                                contentDescription = null,
-                                tint = ComicInkBlack,
-                                modifier = Modifier.size(40.dp)
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = if (uiState.filter == TaskFilter.ALL) "NO SCHEDULE ITEMS TODAY" else "NO ITEMS IN THIS VIEW",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                                color = ComicInkBlack
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Tap '+' below to add your commitments for today.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = ComicTextSecondary,
-                                textAlign = TextAlign.Center
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Box(
                                 modifier = Modifier
-                                    .background(ComicInkBlack)
-                                    .clickable { showAddDialog = true }
-                                    .padding(horizontal = 20.dp, vertical = 10.dp)
+                                    .size(64.dp)
+                                    .background(SoftGreenLight, shape = CircleShape)
+                                    .border(width = 2.dp, color = Color(0xFFDCFCE7), shape = CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text("ADD COMMITMENT", fontWeight = FontWeight.Black, fontSize = 12.sp, color = Color.White)
+                                Icon(
+                                    imageVector = Icons.Default.CalendarMonth,
+                                    contentDescription = null,
+                                    tint = SoftGreen,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(14.dp))
+
+                            Text(
+                                text = if (uiState.filter == TaskFilter.ALL) "NO SCHEDULE ITEMS TODAY" else "NO ITEMS IN THIS VIEW",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.5.sp,
+                                    fontSize = 16.sp
+                                ),
+                                color = Color(0xFF1E293B),
+                                textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "Tap below to lock in commitments before the bear gets grumpy.",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp,
+                                    lineHeight = 18.sp
+                                ),
+                                color = Color(0xFF94A3B8),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.widthIn(max = 230.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(18.dp))
+
+                            Tactile3DButton(
+                                onClick = { showAddDialog = true },
+                                containerColor = SoftGreen,
+                                bottomLipColor = SoftGreenShadow,
+                                cornerRadius = 16.dp,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "+  ADD COMMITMENT",
+                                    style = MaterialTheme.typography.labelLarge.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.8.sp
+                                    ),
+                                    color = Color.White
+                                )
                             }
                         }
                     }
                 }
             }
 
-            // Schedule Items List (Full Width Sharp Frames)
+            // Schedule Items List
             items(uiState.filteredItems, key = { it.id }) { item ->
-                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 5.dp)) {
                     ScheduleItemCard(
                         item = item,
                         onToggleCompleted = { onToggleCompleted(item) },
@@ -474,7 +573,7 @@ fun HomeScreen(
         }
     }
 
-    // Add Task Dialog (Sharp Light Mode Frame)
+    // Add Task Dialog
     if (showAddDialog) {
         var taskTitle by remember { mutableStateOf("") }
         var isAllDay by remember { mutableStateOf(false) }
@@ -487,7 +586,7 @@ fun HomeScreen(
                 Text(
                     text = "ADD SCHEDULE COMMITMENT",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                    color = ComicInkBlack
+                    color = SoftTextPrimary
                 )
             },
             text = {
@@ -495,7 +594,7 @@ fun HomeScreen(
                     Text(
                         text = "Commit to it. The bear will track whether you finish.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = ComicTextSecondary
+                        color = SoftTextSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -505,11 +604,12 @@ fun HomeScreen(
                         label = { Text("Task or Event Title") },
                         placeholder = { Text("e.g. Finish client report, Workout") },
                         singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ComicInkBlack,
-                            unfocusedBorderColor = ComicBorderSubtle,
-                            focusedTextColor = ComicInkBlack,
-                            unfocusedTextColor = ComicInkBlack
+                            focusedBorderColor = SoftGreen,
+                            unfocusedBorderColor = SoftBorder,
+                            focusedTextColor = SoftTextPrimary,
+                            unfocusedTextColor = SoftTextPrimary
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -525,16 +625,19 @@ fun HomeScreen(
                         Checkbox(
                             checked = isAllDay,
                             onCheckedChange = { isAllDay = it },
-                            colors = CheckboxDefaults.colors(checkedColor = ComicInkBlack)
+                            colors = CheckboxDefaults.colors(checkedColor = SoftGreen)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("ALL-DAY TASK", color = ComicInkBlack, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold))
+                        Text(
+                            text = "ALL-DAY TASK",
+                            color = SoftTextPrimary,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black)
+                        )
                     }
 
                     if (!isAllDay) {
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        // Live Time Preview Header
                         val amPm = if (selectedHour < 12) "AM" else "PM"
                         val displayH = if (selectedHour == 0) 12 else if (selectedHour > 12) selectedHour - 12 else selectedHour
                         val liveTimeStr = String.format("%02d:%02d (%d:%02d %s)", selectedHour, selectedMinute, displayH, selectedMinute, amPm)
@@ -550,16 +653,18 @@ fun HomeScreen(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 0.5.sp
                                 ),
-                                color = ComicInkBlack
+                                color = SoftTextPrimary
                             )
-                            Box(
-                                modifier = Modifier
-                                    .background(ComicInkBlack)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            Tactile3DBadge(
+                                containerColor = SoftGreenLight,
+                                borderColor = SoftGreenBorder,
+                                bottomLipColor = SoftGreenBorder,
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = liveTimeStr,
-                                    color = Color.White,
+                                    color = SoftGreenText,
                                     fontWeight = FontWeight.Black,
                                     fontSize = 11.sp
                                 )
@@ -568,7 +673,6 @@ fun HomeScreen(
 
                         Spacer(modifier = Modifier.height(6.dp))
 
-                        // Directly scrollable drum wheel picker (iOS alarm style, with slight single vibration per number)
                         IosTimeWheelPicker(
                             selectedHour = selectedHour,
                             selectedMinute = selectedMinute,
@@ -581,32 +685,33 @@ fun HomeScreen(
                 }
             },
             confirmButton = {
-                Box(
-                    modifier = Modifier
-                        .background(ComicInkBlack)
-                        .clickable {
-                            if (taskTitle.isNotBlank()) {
-                                onAddTask(taskTitle, isAllDay, selectedHour, selectedMinute)
-                                showAddDialog = false
-                            }
+                Tactile3DButton(
+                    onClick = {
+                        if (taskTitle.isNotBlank()) {
+                            onAddTask(taskTitle, isAllDay, selectedHour, selectedMinute)
+                            showAddDialog = false
                         }
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .testTag("btn_confirm_add_task")
+                    },
+                    containerColor = SoftGreen,
+                    bottomLipColor = SoftGreenShadow,
+                    cornerRadius = 14.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.testTag("btn_confirm_add_task")
                 ) {
                     Text("ADD TO SCHEDULE", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
                 }
             },
-            containerColor = ComicSurfaceWhite,
-            shape = RectangleShape
+            containerColor = SoftSurfaceWhite,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 
-    // Edit Task Dialog (Sharp Light Mode Frame)
+    // Edit Task Dialog
     editingItem?.let { currentItem ->
         val initialCal = remember(currentItem) {
             Calendar.getInstance().apply { timeInMillis = currentItem.startTime }
@@ -622,7 +727,7 @@ fun HomeScreen(
                 Text(
                     text = "EDIT SCHEDULE COMMITMENT",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                    color = ComicInkBlack
+                    color = SoftTextPrimary
                 )
             },
             text = {
@@ -630,7 +735,7 @@ fun HomeScreen(
                     Text(
                         text = "Modify commitment details. The bear expects results.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = ComicTextSecondary
+                        color = SoftTextSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -640,11 +745,12 @@ fun HomeScreen(
                         label = { Text("Task or Event Title") },
                         placeholder = { Text("e.g. Finish client report, Workout") },
                         singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ComicInkBlack,
-                            unfocusedBorderColor = ComicBorderSubtle,
-                            focusedTextColor = ComicInkBlack,
-                            unfocusedTextColor = ComicInkBlack
+                            focusedBorderColor = SoftGreen,
+                            unfocusedBorderColor = SoftBorder,
+                            focusedTextColor = SoftTextPrimary,
+                            unfocusedTextColor = SoftTextPrimary
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -660,16 +766,13 @@ fun HomeScreen(
                         Checkbox(
                             checked = editIsAllDay,
                             onCheckedChange = { editIsAllDay = it },
-                            colors = CheckboxDefaults.colors(
-                                checkedColor = ComicInkBlack,
-                                uncheckedColor = ComicInkBlack
-                            ),
+                            colors = CheckboxDefaults.colors(checkedColor = SoftGreen),
                             modifier = Modifier.testTag("checkbox_edit_all_day")
                         )
                         Text(
                             text = "ALL-DAY COMMITMENT",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                            color = ComicInkBlack,
+                            color = SoftTextPrimary,
                             modifier = Modifier.clickable { editIsAllDay = !editIsAllDay }
                         )
                     }
@@ -677,7 +780,6 @@ fun HomeScreen(
                     if (!editIsAllDay) {
                         Spacer(modifier = Modifier.height(10.dp))
 
-                        // Live Time Preview Header
                         val amPm = if (editHour < 12) "AM" else "PM"
                         val displayHour12 = when (val h = editHour % 12) {
                             0 -> 12
@@ -693,16 +795,18 @@ fun HomeScreen(
                             Text(
                                 text = "COMMITMENT TIME",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                                color = ComicInkBlack
+                                color = SoftTextPrimary
                             )
-                            Box(
-                                modifier = Modifier
-                                    .background(ComicInkBlack)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            Tactile3DBadge(
+                                containerColor = SoftGreenLight,
+                                borderColor = SoftGreenBorder,
+                                bottomLipColor = SoftGreenBorder,
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = liveTimeStr,
-                                    color = Color.White,
+                                    color = SoftGreenText,
                                     fontWeight = FontWeight.Black,
                                     fontSize = 11.sp
                                 )
@@ -711,7 +815,6 @@ fun HomeScreen(
 
                         Spacer(modifier = Modifier.height(6.dp))
 
-                        // Directly scrollable drum wheel picker (iOS alarm style, with slight single vibration per number)
                         IosTimeWheelPicker(
                             selectedHour = editHour,
                             selectedMinute = editMinute,
@@ -724,28 +827,81 @@ fun HomeScreen(
                 }
             },
             confirmButton = {
-                Box(
-                    modifier = Modifier
-                        .background(ComicInkBlack)
-                        .clickable {
-                            if (editTitle.isNotBlank()) {
-                                onEditTask(currentItem, editTitle, editIsAllDay, editHour, editMinute)
-                                editingItem = null
-                            }
+                Tactile3DButton(
+                    onClick = {
+                        if (editTitle.isNotBlank()) {
+                            onEditTask(currentItem, editTitle, editIsAllDay, editHour, editMinute)
+                            editingItem = null
                         }
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .testTag("btn_confirm_edit_task")
+                    },
+                    containerColor = SoftGreen,
+                    bottomLipColor = SoftGreenShadow,
+                    cornerRadius = 14.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.testTag("btn_confirm_edit_task")
                 ) {
                     Text("SAVE CHANGES", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingItem = null }) {
-                    Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
                 }
             },
-            containerColor = ComicSurfaceWhite,
-            shape = RectangleShape
+            containerColor = SoftSurfaceWhite,
+            shape = RoundedCornerShape(24.dp)
         )
+    }
+}
+
+@Composable
+private fun FilterTabButton(
+    label: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    testTag: String,
+    modifier: Modifier = Modifier
+) {
+    val tabShape = RoundedCornerShape(13.dp)
+    if (isSelected) {
+        Box(
+            modifier = modifier
+                .background(Color(0xFFE2E8F0), shape = tabShape)
+                .padding(bottom = 2.5.dp)
+                .background(SoftSurfaceWhite, shape = tabShape)
+                .border(width = 1.5.dp, color = Color(0xFFE2E8F0), shape = tabShape)
+                .clip(tabShape)
+                .clickable(onClick = onClick)
+                .padding(vertical = 8.dp)
+                .testTag(testTag),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Black,
+                    fontSize = 12.sp
+                ),
+                color = SoftGreenShadow
+            )
+        }
+    } else {
+        Box(
+            modifier = modifier
+                .clip(tabShape)
+                .clickable(onClick = onClick)
+                .padding(vertical = 9.dp)
+                .testTag(testTag),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Black,
+                    fontSize = 12.sp
+                ),
+                color = Color(0xFF64748B)
+            )
+        }
     }
 }

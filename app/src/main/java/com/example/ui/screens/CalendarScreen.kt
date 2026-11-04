@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -8,24 +7,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ScheduleItem
-import com.example.ui.components.IosTimeWheelPicker
-import com.example.ui.components.ScheduleItemCard
+import com.example.ui.components.*
 import com.example.ui.theme.*
 import com.example.ui.viewmodel.SavageUiState
 import java.text.SimpleDateFormat
@@ -52,10 +51,8 @@ fun CalendarScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<ScheduleItem?>(null) }
 
-    // Calendar navigation state (current displayed month/year)
     val displayCalendar = remember {
         val cal = Calendar.getInstance()
-        // If a date is currently selected in uiState, initialize to that month
         if (uiState.selectedCalendarDate.isNotBlank()) {
             try {
                 val parts = uiState.selectedCalendarDate.split("-")
@@ -71,7 +68,7 @@ fun CalendarScreen(
     }
 
     val currentYear = displayCalendar.value.get(Calendar.YEAR)
-    val currentMonth = displayCalendar.value.get(Calendar.MONTH) // 0-indexed
+    val currentMonth = displayCalendar.value.get(Calendar.MONTH)
 
     val monthYearTitle = remember(currentYear, currentMonth) {
         val cal = Calendar.getInstance().apply {
@@ -82,7 +79,6 @@ fun CalendarScreen(
         SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(cal.time).uppercase()
     }
 
-    // Days in current month
     val daysInMonth = remember(currentYear, currentMonth) {
         val cal = Calendar.getInstance().apply {
             set(Calendar.YEAR, currentYear)
@@ -92,17 +88,15 @@ fun CalendarScreen(
         cal.getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    // Day of week of 1st day (Calendar.SUNDAY = 1 .. SATURDAY = 7)
     val firstDayOfWeekOffset = remember(currentYear, currentMonth) {
         val cal = Calendar.getInstance().apply {
             set(Calendar.YEAR, currentYear)
             set(Calendar.MONTH, currentMonth)
             set(Calendar.DAY_OF_MONTH, 1)
         }
-        cal.get(Calendar.DAY_OF_WEEK) - 1 // 0 for Sunday, 1 for Monday, etc.
+        cal.get(Calendar.DAY_OF_WEEK) - 1
     }
 
-    // Items grouped by date for this month
     val monthPrefix = String.format("%04d-%02d", currentYear, currentMonth + 1)
     val monthItems = remember(uiState.allItems, monthPrefix) {
         uiState.allItems.filter { it.dateString.startsWith(monthPrefix) }
@@ -121,7 +115,7 @@ fun CalendarScreen(
                 set(Calendar.MONTH, parts[1].toInt() - 1)
                 set(Calendar.DAY_OF_MONTH, parts[2].toInt())
             }
-            SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault()).format(cal.time).uppercase()
+            SimpleDateFormat("EEEE, MMMM d, yyyy", Locale.getDefault()).format(cal.time)
         } catch (_: Exception) {
             selectedDate
         }
@@ -133,23 +127,25 @@ fun CalendarScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = ComicWhiteBg,
+        containerColor = SoftCanvasBg,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         floatingActionButton = {
-            Box(
+            Tactile3DButton(
+                onClick = { showAddDialog = true },
+                containerColor = SoftNavy,
+                bottomLipColor = SoftNavyShadow,
+                cornerRadius = 16.dp,
+                lipHeight = 4.dp,
+                contentPadding = PaddingValues(0.dp),
                 modifier = Modifier
-                    .size(52.dp)
-                    .background(ComicInkBlack, shape = RectangleShape)
-                    .border(width = 2.dp, color = ComicInkBlack, shape = RectangleShape)
-                    .clickable { showAddDialog = true }
-                    .testTag("fab_add_task_calendar"),
-                contentAlignment = Alignment.Center
+                    .size(50.dp)
+                    .testTag("fab_add_task_calendar")
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Commitment For Date",
                     tint = Color.White,
-                    modifier = Modifier.size(28.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
         }
@@ -158,491 +154,633 @@ fun CalendarScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            contentPadding = PaddingValues(bottom = 68.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
         ) {
-            // Header Frame
+            // Header Section
             item {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(ComicSurfaceWhite)
-                        .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .testTag("header_calendar_page")
+                        .padding(vertical = 4.dp)
+                        .testTag("header_calendar_page"),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column {
-                            Text(
-                                text = "CALENDAR & SCHEDULE",
-                                style = MaterialTheme.typography.titleLarge.copy(
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.2.sp,
-                                    fontSize = 20.sp
-                                ),
-                                color = ComicInkBlack
-                            )
-                            Text(
-                                text = "BROWSE AND SCHEDULE PAST & FUTURE DATES",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.6.sp
-                                ),
-                                color = ComicTextSecondary
-                            )
-                        }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Calendar & Schedule",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 22.sp
+                            ),
+                            color = Color(0xFF1E293B)
+                        )
+                        Text(
+                            text = "Browse & schedule past & future dates",
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            ),
+                            color = Color(0xFF94A3B8)
+                        )
+                    }
 
-                        // Jump to today button
-                        Box(
-                            modifier = Modifier
-                                .border(width = 1.5.dp, color = ComicInkBlack)
-                                .background(if (selectedDate == todayDateString) ComicInkBlack else ComicSurfaceSubtle)
-                                .clickable {
-                                    val now = Calendar.getInstance()
-                                    displayCalendar.value = (now.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 1) }
-                                    onSelectDate(todayDateString)
-                                }
-                                .padding(horizontal = 10.dp, vertical = 6.dp)
-                                .testTag("btn_jump_to_today")
-                        ) {
-                            Text(
-                                text = "TODAY",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                                color = if (selectedDate == todayDateString) Color.White else ComicInkBlack
-                            )
-                        }
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // Chunky 3D TODAY shortcut button
+                    Tactile3DButton(
+                        onClick = {
+                            val now = Calendar.getInstance()
+                            displayCalendar.value = (now.clone() as Calendar).apply { set(Calendar.DAY_OF_MONTH, 1) }
+                            onSelectDate(todayDateString)
+                        },
+                        containerColor = SoftBlue,
+                        bottomLipColor = SoftBlueShadow,
+                        cornerRadius = 14.dp,
+                        lipHeight = 3.5.dp,
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+                        modifier = Modifier.testTag("btn_jump_to_today")
+                    ) {
+                        Text(
+                            text = "TODAY",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Black,
+                                fontSize = 12.sp,
+                                letterSpacing = 0.6.sp
+                            ),
+                            color = Color.White
+                        )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(10.dp))
             }
 
-            // Month Navigation Banner
+            // Month Navigator Card
             item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .background(ComicInkBlack)
-                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                Tactile3DCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 20.dp,
+                    lipHeight = 2.5.dp,
+                    contentPadding = PaddingValues(10.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        IconButton(
+                        // Previous Month Button
+                        Tactile3DButton(
                             onClick = {
                                 val cal = displayCalendar.value.clone() as Calendar
                                 cal.add(Calendar.MONTH, -1)
                                 displayCalendar.value = cal
                             },
-                            modifier = Modifier.size(36.dp).testTag("btn_prev_month")
+                            containerColor = SoftSurfaceSubtle,
+                            bottomLipColor = SoftBorder,
+                            borderColor = SoftBorder,
+                            cornerRadius = 12.dp,
+                            lipHeight = 3.dp,
+                            contentPadding = PaddingValues(0.dp),
+                            modifier = Modifier
+                                .size(38.dp)
+                                .testTag("btn_prev_month")
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                                 contentDescription = "Previous Month",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
+                                tint = SoftTextSecondary,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
 
-                        Text(
-                            text = monthYearTitle,
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.2.sp
-                            ),
-                            color = Color.White
-                        )
+                        // Current Month Pill Badge
+                        Tactile3DBadge(
+                            containerColor = SoftBlueLight,
+                            borderColor = SoftBlueBorder,
+                            bottomLipColor = SoftBlueBorder,
+                            shape = CircleShape,
+                            lipHeight = 3.dp,
+                            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 7.dp)
+                        ) {
+                            Text(
+                                text = monthYearTitle,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.8.sp,
+                                    fontSize = 15.sp
+                                ),
+                                color = SoftBlueText
+                            )
+                        }
 
-                        IconButton(
+                        // Next Month Button
+                        Tactile3DButton(
                             onClick = {
                                 val cal = displayCalendar.value.clone() as Calendar
                                 cal.add(Calendar.MONTH, 1)
                                 displayCalendar.value = cal
                             },
-                            modifier = Modifier.size(36.dp).testTag("btn_next_month")
+                            containerColor = SoftSurfaceSubtle,
+                            bottomLipColor = SoftBorder,
+                            borderColor = SoftBorder,
+                            cornerRadius = 12.dp,
+                            lipHeight = 3.dp,
+                            contentPadding = PaddingValues(0.dp),
+                            modifier = Modifier
+                                .size(38.dp)
+                                .testTag("btn_next_month")
                         ) {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 contentDescription = "Next Month",
-                                tint = Color.White,
-                                modifier = Modifier.size(20.dp)
+                                tint = SoftTextSecondary,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Month Grid Card
+            // Calendar Grid Card
             item {
-                Box(
+                Tactile3DCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .background(ComicSurfaceWhite)
-                        .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(10.dp)
-                        .testTag("card_calendar_grid")
+                        .testTag("card_calendar_grid"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 22.dp,
+                    lipHeight = 2.5.dp,
+                    contentPadding = PaddingValues(12.dp)
                 ) {
-                    Column {
-                        // Weekday labels (SUN .. SAT)
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            val daysOfWeek = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
-                            for (dow in daysOfWeek) {
-                                Box(
-                                    modifier = Modifier.weight(1f).padding(vertical = 4.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = dow,
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp
-                                        ),
-                                        color = if (dow == "SUN" || dow == "SAT") ComicAccentRed else ComicInkBlack
+                    // Weekday Headers (SUN .. SAT)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 6.dp)
+                    ) {
+                        val daysOfWeek = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
+                        for (dow in daysOfWeek) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = dow,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = when (dow) {
+                                        "SUN" -> SoftRed
+                                        "SAT" -> SoftOrange
+                                        else -> SoftTextMuted
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    // Days Grid
+                    val totalCells = firstDayOfWeekOffset + daysInMonth
+                    val numRows = (totalCells + 6) / 7
+
+                    for (row in 0 until numRows) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            for (col in 0 until 7) {
+                                val cellIndex = row * 7 + col
+                                val dayNumber = cellIndex - firstDayOfWeekOffset + 1
+
+                                if (dayNumber in 1..daysInMonth) {
+                                    val dateStr = String.format("%04d-%02d-%02d", currentYear, currentMonth + 1, dayNumber)
+                                    val isSelected = dateStr == selectedDate
+                                    val isToday = dateStr == todayDateString
+
+                                    val dayItems = uiState.allItems.filter { it.dateString == dateStr }
+                                    val dayTotal = dayItems.size
+                                    val dayCompleted = dayItems.count { it.isCompleted }
+                                    val hasTasks = dayTotal > 0
+                                    val isAllDone = hasTasks && dayCompleted == dayTotal
+
+                                    val cellShape = RoundedCornerShape(12.dp)
+
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(40.dp)
+                                            .padding(vertical = 2.dp)
+                                            .then(
+                                                when {
+                                                    isSelected -> Modifier
+                                                        .background(SoftNavyShadow, shape = cellShape)
+                                                        .padding(bottom = 3.dp)
+                                                        .background(SoftNavy, shape = cellShape)
+                                                    isAllDone -> Modifier
+                                                        .background(SoftGreenLight, shape = cellShape)
+                                                        .border(width = 1.dp, color = SoftGreenBorder, shape = cellShape)
+                                                    isToday -> Modifier
+                                                        .background(SoftBlueLight, shape = cellShape)
+                                                        .border(width = 1.5.dp, color = SoftBlueBorder, shape = cellShape)
+                                                    else -> Modifier
+                                                }
+                                            )
+                                            .clip(cellShape)
+                                            .clickable { onSelectDate(dateStr) }
+                                            .testTag("day_cell_$dateStr"),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Text(
+                                                text = dayNumber.toString(),
+                                                style = MaterialTheme.typography.bodySmall.copy(
+                                                    fontWeight = FontWeight.Black,
+                                                    fontSize = 13.sp
+                                                ),
+                                                color = when {
+                                                    isSelected -> Color.White
+                                                    isAllDone -> SoftGreenText
+                                                    isToday -> SoftBlueText
+                                                    else -> SoftTextPrimary
+                                                }
+                                            )
+
+                                            if (hasTasks || isSelected) {
+                                                Spacer(modifier = Modifier.height(1.dp))
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(5.dp)
+                                                        .background(
+                                                            color = when {
+                                                                isAllDone -> SoftGreen
+                                                                hasTasks -> SoftOrange
+                                                                else -> SoftGreen
+                                                            },
+                                                            shape = CircleShape
+                                                        )
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .height(40.dp)
                                     )
                                 }
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        // Days grid
-                        val totalCells = firstDayOfWeekOffset + daysInMonth
-                        val numRows = (totalCells + 6) / 7
-
-                        for (row in 0 until numRows) {
-                            Row(modifier = Modifier.fillMaxWidth()) {
-                                for (col in 0 until 7) {
-                                    val cellIndex = row * 7 + col
-                                    val dayNumber = cellIndex - firstDayOfWeekOffset + 1
-
-                                    if (dayNumber in 1..daysInMonth) {
-                                        val dateStr = String.format("%04d-%02d-%02d", currentYear, currentMonth + 1, dayNumber)
-                                        val isSelected = dateStr == selectedDate
-                                        val isToday = dateStr == todayDateString
-
-                                        val dayItems = uiState.allItems.filter { it.dateString == dateStr }
-                                        val dayTotal = dayItems.size
-                                        val dayCompleted = dayItems.count { it.isCompleted }
-                                        val hasTasks = dayTotal > 0
-                                        val isAllDone = hasTasks && dayCompleted == dayTotal
-
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f)
-                                                .padding(2.dp)
-                                                .background(
-                                                    when {
-                                                        isSelected -> ComicInkBlack
-                                                        isToday -> Color(0xFFFEF3C7)
-                                                        else -> Color.Transparent
-                                                    }
-                                                )
-                                                .border(
-                                                    width = if (isToday) 2.dp else if (isSelected) 2.dp else 1.dp,
-                                                    color = when {
-                                                        isSelected -> ComicInkBlack
-                                                        isToday -> ComicInkBlack
-                                                        else -> ComicBorderSubtle
-                                                    }
-                                                )
-                                                .clickable { onSelectDate(dateStr) }
-                                                .testTag("day_cell_$dateStr"),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center
-                                            ) {
-                                                Text(
-                                                    text = dayNumber.toString(),
-                                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                                        fontWeight = if (isSelected || isToday) FontWeight.Black else FontWeight.Bold,
-                                                        fontSize = 13.sp
-                                                    ),
-                                                    color = when {
-                                                        isSelected -> Color.White
-                                                        else -> ComicInkBlack
-                                                    }
-                                                )
-
-                                                // Status dot or badge
-                                                if (hasTasks) {
-                                                    Spacer(modifier = Modifier.height(2.dp))
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(6.dp)
-                                                            .background(
-                                                                color = when {
-                                                                    isAllDone -> ComicAccentGreen
-                                                                    isSelected -> Color(0xFFF87171)
-                                                                    else -> ComicAccentRed
-                                                                },
-                                                                shape = CircleShape
-                                                            )
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        // Empty cell for offset
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f)
-                                                .padding(2.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Monthly Scorecard Summary
+            // Monthly Scorecard Card
             item {
-                Box(
+                Tactile3DCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .background(ComicSurfaceWhite)
-                        .border(width = 2.dp, color = ComicInkBlack)
-                        .padding(12.dp)
-                        .testTag("card_month_summary")
+                        .testTag("card_month_summary"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 20.dp,
+                    lipHeight = 2.5.dp,
+                    contentPadding = PaddingValues(14.dp)
                 ) {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "☒",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Black,
+                                color = SoftOrange
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = "$monthYearTitle SCORECARD",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Black,
-                                    letterSpacing = 0.8.sp
+                                    letterSpacing = 0.6.sp,
+                                    fontSize = 12.sp
                                 ),
-                                color = ComicInkBlack
-                            )
-                            Text(
-                                text = "$monthCompleted / $monthTotal DONE ($monthPercent%)",
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                                color = if (monthPercent >= 100 && monthTotal > 0) ComicAccentGreen else ComicInkBlack
+                                color = SoftTextPrimary
                             )
                         }
 
-                        Spacer(modifier = Modifier.height(6.dp))
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .background(ComicSurfaceSubtle)
-                                .border(width = 1.dp, color = ComicInkBlack)
+                        Tactile3DBadge(
+                            containerColor = SoftGreenLight,
+                            borderColor = SoftGreenBorder,
+                            bottomLipColor = SoftGreenBorder,
+                            shape = CircleShape,
+                            lipHeight = 2.dp,
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 2.5.dp)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .fillMaxWidth(fraction = (monthCompleted.toFloat() / monthTotal.coerceAtLeast(1)).coerceIn(0f, 1f))
-                                    .background(if (monthPercent >= 100 && monthTotal > 0) ComicAccentGreen else ComicInkBlack)
+                            Text(
+                                text = "$monthCompleted / $monthTotal Done ($monthPercent%)",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                ),
+                                color = SoftGreen
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    TactileGlossyProgressBar(
+                        progress = monthCompleted.toFloat() / monthTotal.coerceAtLeast(1),
+                        modifier = Modifier.fillMaxWidth(),
+                        height = 16.dp,
+                        minVisualFraction = 0.14f
+                    )
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Selected Date Banner & Bear Commentary
+            // Selected Date Action Card
             item {
                 val isToday = selectedDate == todayDateString
                 val hasItems = selectedDayItems.isNotEmpty()
                 val isAllDone = hasItems && selectedDayItems.all { it.isCompleted }
 
                 val bearAssessment = when {
-                    isToday && isAllDone -> "🎉 100% DONE TODAY! THE BEAR BEGRUDGINGLY ADMITS YOU WORKED."
-                    isToday && hasItems -> "⚠️ TODAY'S SCHEDULE IS ACTIVE. GET OFF THE CALENDAR AND EXECUTE."
-                    isToday && !hasItems -> "NOTHING SCHEDULED FOR TODAY. THE BEAR IS WAITING."
-                    isAllDone -> "RECORDED VICTORY: YOU ACTUALLY FINISHED EVERY TASK ON THIS DATE."
-                    hasItems -> "UNFINISHED PROMISES DOCUMENTED IN THE ARCHIVES FOR THIS DAY."
-                    else -> "CLEAN SLATE. NO COMMITMENTS SCHEDULED ON THIS DATE."
+                    isToday && isAllDone -> "100% done today! The bear begrudgingly admits you worked."
+                    isToday && hasItems -> "Today's schedule is active. Time to execute your promises!"
+                    isToday && !hasItems -> "Nothing scheduled for today. The bear is resting peacefully!"
+                    isAllDone -> "Recorded victory! You finished every task on this date."
+                    hasItems -> "Unfinished commitments logged in the schedule for this day."
+                    else -> "Clean slate. No commitments scheduled on this date yet!"
                 }
 
-                Box(
+                Tactile3DCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                        .background(if (isAllDone) Color(0xFFF0FDF4) else ComicSurfaceWhite)
-                        .border(width = 2.dp, color = if (isAllDone) ComicAccentGreen else ComicInkBlack)
-                        .padding(14.dp)
-                        .testTag("banner_selected_date")
+                        .testTag("banner_selected_date"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 22.dp,
+                    lipHeight = 2.5.dp,
+                    contentPadding = PaddingValues(14.dp)
                 ) {
-                    Column {
+                    // Date Header & Counter Pill
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                if (isToday) {
-                                    Box(
-                                        modifier = Modifier
-                                            .background(ComicInkBlack)
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = "TODAY",
+                            if (isToday) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(SoftNavyShadow, shape = RoundedCornerShape(7.dp))
+                                        .padding(bottom = 2.dp)
+                                        .background(SoftNavy, shape = RoundedCornerShape(7.dp))
+                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                ) {
+                                    Text(
+                                        text = "TODAY",
+                                        style = MaterialTheme.typography.labelSmall.copy(
                                             fontWeight = FontWeight.Black,
-                                            fontSize = 9.sp,
-                                            color = Color.White
-                                        )
-                                    }
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                            fontSize = 10.sp,
+                                            letterSpacing = 0.5.sp
+                                        ),
+                                        color = Color.White
+                                    )
                                 }
-                                Text(
-                                    text = selectedDateFormatted,
-                                    style = MaterialTheme.typography.titleSmall.copy(
-                                        fontWeight = FontWeight.Black,
-                                        letterSpacing = 0.5.sp
-                                    ),
-                                    color = ComicInkBlack
-                                )
+                                Spacer(modifier = Modifier.width(8.dp))
                             }
-
-                            Box(
-                                modifier = Modifier
-                                    .border(width = 1.dp, color = ComicInkBlack)
-                                    .background(ComicSurfaceSubtle)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = "${selectedDayItems.count { it.isCompleted }} / ${selectedDayItems.size}",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                                    color = ComicInkBlack
-                                )
-                            }
+                            Text(
+                                text = selectedDateFormatted,
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 13.sp
+                                ),
+                                color = Color(0xFF334155)
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Tactile3DBadge(
+                            containerColor = SoftSurfaceSubtle,
+                            borderColor = SoftBorder,
+                            bottomLipColor = SoftBorder,
+                            shape = CircleShape,
+                            lipHeight = 2.5.dp,
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = "${selectedDayItems.count { it.isCompleted }} / ${selectedDayItems.size}",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 11.sp
+                                ),
+                                color = SoftTextMuted
+                            )
+                        }
+                    }
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Mascot Status Message Box with Ballot Box Icon
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Color(0xFFF8FAFC), shape = RoundedCornerShape(14.dp))
+                            .border(width = 1.dp, color = Color(0xFFE2E8F0), shape = RoundedCornerShape(14.dp))
+                            .padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(Color(0xFFFEF3C7), shape = CircleShape)
+                                .border(width = 1.dp, color = Color(0xFFFDE68A), shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "☒",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Black,
+                                color = SoftOrange
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = bearAssessment,
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.sp
+                                fontSize = 12.sp,
+                                lineHeight = 16.sp
                             ),
-                            color = if (isAllDone) ComicAccentGreen else ComicTextSecondary
+                            color = Color(0xFF64748B),
+                            modifier = Modifier.weight(1f)
                         )
+                    }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                        // Action Buttons Bar (Sync & Add)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            if (uiState.hasCalendarPermission) {
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .border(width = 1.5.dp, color = ComicInkBlack)
-                                        .background(ComicSurfaceSubtle)
-                                        .clickable { onSyncCalendarForDate(selectedDate) }
-                                        .padding(vertical = 8.dp)
-                                        .testTag("btn_sync_selected_date"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Default.Sync,
-                                            contentDescription = null,
-                                            tint = ComicInkBlack,
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(6.dp))
-                                        Text(
-                                            text = "SYNC DEVICE CAL",
-                                            fontWeight = FontWeight.Black,
-                                            fontSize = 10.sp,
-                                            color = ComicInkBlack
-                                        )
-                                    }
-                                }
-                            }
-
-                            Box(
+                    // Dual Chunky Action Buttons (Sync Cal + Add Task)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        if (uiState.hasCalendarPermission) {
+                            Tactile3DButton(
+                                onClick = { onSyncCalendarForDate(selectedDate) },
+                                containerColor = SoftSurfaceWhite,
+                                bottomLipColor = Color(0xFF94A3B8),
+                                borderColor = Color(0xFFCBD5E1),
+                                cornerRadius = 14.dp,
+                                lipHeight = 3.5.dp,
+                                contentPadding = PaddingValues(vertical = 10.dp, horizontal = 10.dp),
                                 modifier = Modifier
                                     .weight(1f)
-                                    .background(ComicInkBlack)
-                                    .clickable { showAddDialog = true }
-                                    .padding(vertical = 8.dp)
-                                    .testTag("btn_add_task_selected_date"),
-                                contentAlignment = Alignment.Center
+                                    .testTag("btn_sync_selected_date")
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        tint = Color.White,
-                                        modifier = Modifier.size(14.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "ADD COMMITMENT",
+                                Text(
+                                    text = "☒",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = Color(0xFF475569)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Sync Cal",
+                                    style = MaterialTheme.typography.labelMedium.copy(
                                         fontWeight = FontWeight.Black,
-                                        fontSize = 10.sp,
-                                        color = Color.White
-                                    )
-                                }
+                                        fontSize = 12.sp
+                                    ),
+                                    color = Color(0xFF475569)
+                                )
                             }
+                        }
+
+                        Tactile3DButton(
+                            onClick = { showAddDialog = true },
+                            containerColor = SoftGreen,
+                            bottomLipColor = Color(0xFF388501),
+                            borderColor = SoftGreenShadow,
+                            cornerRadius = 14.dp,
+                            lipHeight = 3.5.dp,
+                            contentPadding = PaddingValues(vertical = 10.dp, horizontal = 10.dp),
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("btn_add_task_selected_date")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = "Add Task",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 12.sp
+                                ),
+                                color = Color.White
+                            )
                         }
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // List of items for selected date
+            // Commitments List or Empty State for Selected Date
             if (selectedDayItems.isEmpty()) {
                 item {
-                    Box(
+                    Tactile3DCard(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp)
-                            .background(ComicSurfaceWhite)
-                            .border(width = 2.dp, color = ComicInkBlack)
-                            .padding(24.dp)
                             .testTag("empty_state_calendar_date"),
-                        contentAlignment = Alignment.Center
+                        containerColor = SoftSurfaceWhite,
+                        borderColor = SoftBorder,
+                        bottomLipColor = SoftBorder,
+                        cornerRadius = 22.dp,
+                        lipHeight = 2.5.dp,
+                        contentPadding = PaddingValues(20.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.CalendarToday,
-                                contentDescription = null,
-                                tint = ComicInkBlack,
-                                modifier = Modifier.size(36.dp)
-                            )
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .background(SoftBlueLight, shape = RoundedCornerShape(16.dp))
+                                    .border(width = 2.dp, color = SoftBlueBorder, shape = RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "☒",
+                                    fontSize = 24.sp,
+                                    fontWeight = FontWeight.Black,
+                                    color = SoftBlueText
+                                )
+                            }
+
                             Spacer(modifier = Modifier.height(10.dp))
+
                             Text(
                                 text = "NO COMMITMENTS FOR THIS DATE",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                                color = ComicInkBlack
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = "Plan ahead or log your tasks for this date.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = ComicTextSecondary,
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 14.sp,
+                                    letterSpacing = 0.4.sp
+                                ),
+                                color = Color(0xFF334155),
                                 textAlign = TextAlign.Center
+                            )
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            Text(
+                                text = "Plan ahead or log your friendly micro-goals for this date!",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 12.sp
+                                ),
+                                color = Color(0xFF94A3B8),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.widthIn(max = 220.dp)
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(70.dp))
                 }
             } else {
                 items(selectedDayItems, key = { it.id }) { item ->
-                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                    Box(modifier = Modifier.padding(vertical = 5.dp)) {
                         ScheduleItemCard(
                             item = item,
                             onToggleCompleted = { onToggleCompleted(item) },
@@ -650,6 +788,9 @@ fun CalendarScreen(
                             onDelete = { onDeleteItem(item) }
                         )
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(70.dp))
                 }
             }
         }
@@ -668,7 +809,7 @@ fun CalendarScreen(
                 Text(
                     text = "ADD COMMITMENT ($selectedDate)",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                    color = ComicInkBlack
+                    color = SoftTextPrimary
                 )
             },
             text = {
@@ -676,7 +817,7 @@ fun CalendarScreen(
                     Text(
                         text = "Add a task scheduled for $selectedDateFormatted.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = ComicTextSecondary
+                        color = SoftTextSecondary
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -686,13 +827,16 @@ fun CalendarScreen(
                         label = { Text("Task or Event Title") },
                         placeholder = { Text("e.g. Doctor appointment, Gym") },
                         singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ComicInkBlack,
-                            unfocusedBorderColor = ComicBorderSubtle,
-                            focusedTextColor = ComicInkBlack,
-                            unfocusedTextColor = ComicInkBlack
+                            focusedBorderColor = SoftGreen,
+                            unfocusedBorderColor = SoftBorder,
+                            focusedTextColor = SoftTextPrimary,
+                            unfocusedTextColor = SoftTextPrimary
                         ),
-                        modifier = Modifier.fillMaxWidth().testTag("input_calendar_task_title")
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("input_calendar_task_title")
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -704,13 +848,13 @@ fun CalendarScreen(
                         Checkbox(
                             checked = isAllDay,
                             onCheckedChange = { isAllDay = it },
-                            colors = CheckboxDefaults.colors(checkedColor = ComicInkBlack)
+                            colors = CheckboxDefaults.colors(checkedColor = SoftGreen)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             "ALL-DAY TASK",
-                            color = ComicInkBlack,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                            color = SoftTextPrimary,
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black)
                         )
                     }
 
@@ -729,16 +873,18 @@ fun CalendarScreen(
                             Text(
                                 text = "COMMITMENT TIME",
                                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
-                                color = ComicInkBlack
+                                color = SoftTextPrimary
                             )
-                            Box(
-                                modifier = Modifier
-                                    .background(ComicInkBlack)
-                                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                            Tactile3DBadge(
+                                containerColor = SoftGreenLight,
+                                borderColor = SoftGreenBorder,
+                                bottomLipColor = SoftGreenBorder,
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = liveTimeStr,
-                                    color = Color.White,
+                                    color = SoftGreenText,
                                     fontWeight = FontWeight.Black,
                                     fontSize = 11.sp
                                 )
@@ -759,28 +905,29 @@ fun CalendarScreen(
                 }
             },
             confirmButton = {
-                Box(
-                    modifier = Modifier
-                        .background(ComicInkBlack)
-                        .clickable {
-                            if (taskTitle.isNotBlank()) {
-                                onAddTaskForDate(selectedDate, taskTitle, isAllDay, selectedHour, selectedMinute)
-                                showAddDialog = false
-                            }
+                Tactile3DButton(
+                    onClick = {
+                        if (taskTitle.isNotBlank()) {
+                            onAddTaskForDate(selectedDate, taskTitle, isAllDay, selectedHour, selectedMinute)
+                            showAddDialog = false
                         }
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
-                        .testTag("btn_confirm_add_calendar_task")
+                    },
+                    containerColor = SoftGreen,
+                    bottomLipColor = SoftGreenShadow,
+                    cornerRadius = 14.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                    modifier = Modifier.testTag("btn_confirm_add_calendar_task")
                 ) {
                     Text("ADD COMMITMENT", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
                 }
             },
-            containerColor = ComicSurfaceWhite,
-            shape = RectangleShape
+            containerColor = SoftSurfaceWhite,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 
@@ -800,7 +947,7 @@ fun CalendarScreen(
                 Text(
                     text = "EDIT SCHEDULE COMMITMENT",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
-                    color = ComicInkBlack
+                    color = SoftTextPrimary
                 )
             },
             text = {
@@ -810,11 +957,12 @@ fun CalendarScreen(
                         onValueChange = { editTitle = it },
                         label = { Text("Task or Event Title") },
                         singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = ComicInkBlack,
-                            unfocusedBorderColor = ComicBorderSubtle,
-                            focusedTextColor = ComicInkBlack,
-                            unfocusedTextColor = ComicInkBlack
+                            focusedBorderColor = SoftGreen,
+                            unfocusedBorderColor = SoftBorder,
+                            focusedTextColor = SoftTextPrimary,
+                            unfocusedTextColor = SoftTextPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -828,12 +976,12 @@ fun CalendarScreen(
                         Checkbox(
                             checked = editIsAllDay,
                             onCheckedChange = { editIsAllDay = it },
-                            colors = CheckboxDefaults.colors(checkedColor = ComicInkBlack)
+                            colors = CheckboxDefaults.colors(checkedColor = SoftGreen)
                         )
                         Text(
                             text = "ALL-DAY COMMITMENT",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Black),
-                            color = ComicInkBlack
+                            color = SoftTextPrimary
                         )
                     }
 
@@ -851,27 +999,28 @@ fun CalendarScreen(
                 }
             },
             confirmButton = {
-                Box(
-                    modifier = Modifier
-                        .background(ComicInkBlack)
-                        .clickable {
-                            if (editTitle.isNotBlank()) {
-                                onEditTask(currentItem, editTitle, editIsAllDay, editHour, editMinute)
-                                editingItem = null
-                            }
+                Tactile3DButton(
+                    onClick = {
+                        if (editTitle.isNotBlank()) {
+                            onEditTask(currentItem, editTitle, editIsAllDay, editHour, editMinute)
+                            editingItem = null
                         }
-                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                    },
+                    containerColor = SoftGreen,
+                    bottomLipColor = SoftGreenShadow,
+                    cornerRadius = 14.dp,
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                 ) {
                     Text("SAVE CHANGES", color = Color.White, fontWeight = FontWeight.Black, fontSize = 12.sp)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { editingItem = null }) {
-                    Text("CANCEL", color = ComicTextSecondary, fontWeight = FontWeight.Bold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
                 }
             },
-            containerColor = ComicSurfaceWhite,
-            shape = RectangleShape
+            containerColor = SoftSurfaceWhite,
+            shape = RoundedCornerShape(24.dp)
         )
     }
 }
