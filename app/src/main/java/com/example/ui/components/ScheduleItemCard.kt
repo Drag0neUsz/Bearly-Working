@@ -203,7 +203,7 @@ fun ScheduleItemCard(
                             Text(
                                 text = timeText,
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Black,
                                     fontSize = 10.sp,
                                     letterSpacing = 0.4.sp
                                 ),
@@ -219,7 +219,7 @@ fun ScheduleItemCard(
                     Text(
                         text = item.title,
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = if (item.isCompleted) FontWeight.Bold else FontWeight.ExtraBold,
+                            fontWeight = if (item.isCompleted) FontWeight.ExtraBold else FontWeight.Black,
                             textDecoration = if (item.isCompleted) TextDecoration.LineThrough else TextDecoration.None,
                             fontSize = 16.sp
                         ),
@@ -231,7 +231,7 @@ fun ScheduleItemCard(
                     if (!item.description.isNullOrBlank()) {
                         Text(
                             text = item.description,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.ExtraBold),
                             color = SoftTextSecondary,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
@@ -252,7 +252,7 @@ fun ScheduleItemCard(
                             Spacer(modifier = Modifier.width(3.dp))
                             Text(
                                 text = item.location,
-                                style = MaterialTheme.typography.labelSmall,
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Black),
                                 color = SoftTextSecondary,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis

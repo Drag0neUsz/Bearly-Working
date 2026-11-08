@@ -207,7 +207,7 @@ fun SavageBearView(
                     Text(
                         text = "“$displayedText”",
                         style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Black,
                             fontSize = 15.sp,
                             lineHeight = 21.sp
                         ),

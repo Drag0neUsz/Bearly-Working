@@ -424,7 +424,7 @@ fun HomeScreen(
                             else -> "☒ ${uiState.pendingCount} task(s) remaining. Reminder every ${uiState.notificationIntervalMinutes} min."
                         },
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Black,
                             fontSize = 12.sp
                         ),
                         color = if (uiState.completionRatio >= 1f && uiState.totalCount > 0) SoftGreenText else Color(0xFF94A3B8),
@@ -527,7 +527,7 @@ fun HomeScreen(
                             Text(
                                 text = "Tap below to lock in commitments before the bear gets grumpy.",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp,
                                     lineHeight = 18.sp
                                 ),
@@ -703,7 +703,7 @@ fun HomeScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.Black)
                 }
             },
             containerColor = SoftSurfaceWhite,
@@ -845,7 +845,7 @@ fun HomeScreen(
             },
             dismissButton = {
                 TextButton(onClick = { editingItem = null }) {
-                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.Black)
                 }
             },
             containerColor = SoftSurfaceWhite,

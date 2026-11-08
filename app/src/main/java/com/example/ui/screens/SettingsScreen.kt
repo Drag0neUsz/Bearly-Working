@@ -85,7 +85,7 @@ fun SettingsScreen(
                     Text(
                         text = "Configure how often the bear roasts you",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp
                         ),
                         color = SoftTextMuted
@@ -155,7 +155,7 @@ fun SettingsScreen(
                                 Text(
                                     text = "Pokes you continuously until 100% of tasks are completed.",
                                     style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp,
                                         lineHeight = 16.sp
                                     ),
@@ -268,7 +268,7 @@ fun SettingsScreen(
                                 Text(
                                     text = "Uncensored callouts timing",
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.ExtraBold,
                                         fontSize = 11.sp
                                     ),
                                     color = SoftTextMuted
@@ -301,7 +301,7 @@ fun SettingsScreen(
                     Text(
                         text = "Sends a fresh roast at this interval until everything is marked done.",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp
                         ),
                         color = SoftTextMuted
@@ -334,7 +334,7 @@ fun SettingsScreen(
                                         Text(
                                             text = if (isSelected) "${mins}M ✓" else "${mins}M",
                                             style = MaterialTheme.typography.labelLarge.copy(
-                                                fontWeight = FontWeight.ExtraBold,
+                                                fontWeight = FontWeight.Black,
                                                 fontSize = 13.sp
                                             ),
                                             color = if (isSelected) Color.White else Color(0xFF4B4B4B)
@@ -724,7 +724,7 @@ fun SettingsScreen(
                     Text(
                         text = "Reset all unlocked roasts and discovered secrets back to '???'. This action cannot be undone.",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
                             lineHeight = 16.sp
                         ),

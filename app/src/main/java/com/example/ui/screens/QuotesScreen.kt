@@ -218,7 +218,7 @@ private fun CategoryTilesView(
                     Text(
                         text = "BEARLY FINISHED",
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Black,
                             letterSpacing = 0.8.sp,
                             fontSize = 11.sp
                         ),
@@ -310,7 +310,7 @@ private fun CategoryTilesView(
                                 Text(
                                     text = "Roast Collection",
                                     style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Black,
                                         fontSize = 16.sp
                                     ),
                                     color = Color(0xFF1F2937)
@@ -340,7 +340,7 @@ private fun CategoryTilesView(
                             Text(
                                 text = "Tap cards to inspect roasts. Hidden roasts remain '???' until earned by your habits!",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp,
                                     lineHeight = 16.sp
                                 ),
@@ -361,7 +361,7 @@ private fun CategoryTilesView(
                         Text(
                             text = "☒ Total Discovered",
                             style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
+                                fontWeight = FontWeight.Black,
                                 fontSize = 12.sp
                             ),
                             color = Color(0xFF4B5563)
@@ -478,7 +478,7 @@ private fun CategoryTilesView(
                                 Text(
                                     text = displayTitle,
                                     style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Black,
                                         fontSize = 15.sp
                                     ),
                                     color = Color(0xFF1F2937)
@@ -486,7 +486,7 @@ private fun CategoryTilesView(
                                 Text(
                                     text = visual.subtitle,
                                     style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = FontWeight.SemiBold,
+                                        fontWeight = FontWeight.ExtraBold,
                                         fontSize = 12.sp
                                     ),
                                     color = Color(0xFF9CA3AF)
@@ -521,7 +521,7 @@ private fun CategoryTilesView(
                     Text(
                         text = cat.description,
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Medium,
+                            fontWeight = FontWeight.ExtraBold,
                             fontSize = 12.sp,
                             lineHeight = 17.sp
                         ),
@@ -640,7 +640,7 @@ private fun CategoryTilesView(
                     Text(
                         text = "\"Procrastinate more to unlock the rest... or actually do your work!\" — Grumpy Bear",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.ExtraBold,
+                            fontWeight = FontWeight.Black,
                             fontSize = 12.sp
                         ),
                         color = Color(0xFF92400E),
@@ -821,7 +821,7 @@ private fun CategorySubpageView(
                                 Text(
                                     text = "\"$quote\"",
                                     style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.ExtraBold,
+                                        fontWeight = FontWeight.Black,
                                         lineHeight = 20.sp
                                     ),
                                     color = SoftTextPrimary
@@ -863,7 +863,7 @@ private fun CategorySubpageView(
                                 Text(
                                     text = "LOCKED • ${category.title}",
                                     style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
+                                        fontWeight = FontWeight.ExtraBold,
                                         fontSize = 9.sp
                                     ),
                                     color = SoftTextMuted

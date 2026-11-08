@@ -178,7 +178,7 @@ fun CalendarScreen(
                         Text(
                             text = "Browse & schedule past & future dates",
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 fontSize = 12.sp
                             ),
                             color = Color(0xFF94A3B8)
@@ -419,17 +419,13 @@ fun CalendarScreen(
                                                 }
                                             )
 
-                                            if (hasTasks || isSelected) {
+                                            if (hasTasks) {
                                                 Spacer(modifier = Modifier.height(1.dp))
                                                 Box(
                                                     modifier = Modifier
                                                         .size(5.dp)
                                                         .background(
-                                                            color = when {
-                                                                isAllDone -> SoftGreen
-                                                                hasTasks -> SoftOrange
-                                                                else -> SoftGreen
-                                                            },
+                                                            color = if (isAllDone) SoftGreen else SoftOrange,
                                                             shape = CircleShape
                                                         )
                                                 )
@@ -634,7 +630,7 @@ fun CalendarScreen(
                         Text(
                             text = bearAssessment,
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 fontSize = 12.sp,
                                 lineHeight = 16.sp
                             ),
@@ -753,7 +749,7 @@ fun CalendarScreen(
                             Text(
                                 text = "NO COMMITMENTS FOR THIS DATE",
                                 style = MaterialTheme.typography.titleSmall.copy(
-                                    fontWeight = FontWeight.ExtraBold,
+                                    fontWeight = FontWeight.Black,
                                     fontSize = 14.sp,
                                     letterSpacing = 0.4.sp
                                 ),
@@ -766,7 +762,7 @@ fun CalendarScreen(
                             Text(
                                 text = "Plan ahead or log your friendly micro-goals for this date!",
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = FontWeight.ExtraBold,
                                     fontSize = 12.sp
                                 ),
                                 color = Color(0xFF94A3B8),
@@ -923,7 +919,7 @@ fun CalendarScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showAddDialog = false }) {
-                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.Black)
                 }
             },
             containerColor = SoftSurfaceWhite,
@@ -1016,7 +1012,7 @@ fun CalendarScreen(
             },
             dismissButton = {
                 TextButton(onClick = { editingItem = null }) {
-                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
+                    Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.Black)
                 }
             },
             containerColor = SoftSurfaceWhite,

@@ -188,7 +188,7 @@ fun WheelColumn(
                     Text(
                         text = String.format("%02d", num),
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.ExtraBold,
                             fontSize = if (isSelected) 24.sp else 18.sp
                         ),
                         color = if (isSelected) SoftGreenText else SoftTextMuted.copy(alpha = 0.55f)
@@ -285,7 +285,7 @@ fun IosAlarmStyleWheelTimeDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.ExtraBold)
+                Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.Black)
             }
         },
         containerColor = SoftSurfaceWhite,
