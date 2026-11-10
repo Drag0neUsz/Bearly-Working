@@ -74,17 +74,29 @@ class MainActivity : ComponentActivity() {
                 var currentTab by remember { mutableStateOf(MainDestination.SCHEDULE) }
                 val snackbarHostState = remember { SnackbarHostState() }
 
-                // Calendar permission launcher
+                val calendarPermissions = remember {
+                    arrayOf(
+                        Manifest.permission.READ_CALENDAR,
+                        Manifest.permission.WRITE_CALENDAR
+                    )
+                }
+
+                // Calendar permission launcher (Read + Write)
                 val calendarLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.RequestPermission()
-                ) { isGranted ->
+                    contract = ActivityResultContracts.RequestMultiplePermissions()
+                ) { permissionsMap ->
+                    val readGranted = permissionsMap[Manifest.permission.READ_CALENDAR] == true ||
+                        ContextCompat.checkSelfPermission(
+                            this@MainActivity,
+                            Manifest.permission.READ_CALENDAR
+                        ) == PackageManager.PERMISSION_GRANTED
                     val notificationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         ContextCompat.checkSelfPermission(
                             this@MainActivity,
                             Manifest.permission.POST_NOTIFICATIONS
                         ) == PackageManager.PERMISSION_GRANTED
                     } else true
-                    viewModel.updatePermissions(isGranted, notificationGranted)
+                    viewModel.updatePermissions(readGranted, notificationGranted)
                 }
 
                 // Notification permission launcher
@@ -100,9 +112,13 @@ class MainActivity : ComponentActivity() {
 
                 // Initial permission check on launch
                 LaunchedEffect(Unit) {
-                    val calGranted = ContextCompat.checkSelfPermission(
+                    val calReadGranted = ContextCompat.checkSelfPermission(
                         this@MainActivity,
                         Manifest.permission.READ_CALENDAR
+                    ) == PackageManager.PERMISSION_GRANTED
+                    val calWriteGranted = ContextCompat.checkSelfPermission(
+                        this@MainActivity,
+                        Manifest.permission.WRITE_CALENDAR
                     ) == PackageManager.PERMISSION_GRANTED
 
                     val notifGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -112,10 +128,10 @@ class MainActivity : ComponentActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     } else true
 
-                    viewModel.updatePermissions(calGranted, notifGranted)
+                    viewModel.updatePermissions(calReadGranted, notifGranted)
 
-                    if (!calGranted) {
-                        calendarLauncher.launch(Manifest.permission.READ_CALENDAR)
+                    if (!calReadGranted || !calWriteGranted) {
+                        calendarLauncher.launch(calendarPermissions)
                     }
                     if (!notifGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -223,7 +239,7 @@ class MainActivity : ComponentActivity() {
                                 HomeScreen(
                                     uiState = uiState,
                                     onRequestCalendarPermission = {
-                                        calendarLauncher.launch(Manifest.permission.READ_CALENDAR)
+                                        calendarLauncher.launch(calendarPermissions)
                                     },
                                     onRequestNotificationPermission = {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -235,8 +251,8 @@ class MainActivity : ComponentActivity() {
                                     onPokeBear = { viewModel.pokeBear() },
                                     onTriggerSecretRapidTap = { viewModel.triggerSecretRapidTap() },
                                     onSetFilter = { viewModel.setFilter(it) },
-                                    onAddTask = { title, isAllDay, hour, minute ->
-                                        viewModel.addQuickTask(title, isAllDay, hour, minute)
+                                    onAddTask = { title, isAllDay, hour, minute, saveToCalendar ->
+                                        viewModel.addQuickTask(title, isAllDay, hour, minute, saveToCalendar)
                                     },
                                     onEditTask = { item, title, isAllDay, hour, minute ->
                                         viewModel.updateTask(item, title, isAllDay, hour, minute)
@@ -249,13 +265,16 @@ class MainActivity : ComponentActivity() {
                                     onSelectDate = { viewModel.selectCalendarDate(it) },
                                     onToggleCompleted = { viewModel.toggleCompletion(it) },
                                     onDeleteItem = { viewModel.deleteItem(it) },
-                                    onAddTaskForDate = { dateStr, title, isAllDay, hour, minute ->
-                                        viewModel.addTaskForDate(dateStr, title, isAllDay, hour, minute)
+                                    onAddTaskForDate = { dateStr, title, isAllDay, hour, minute, saveToCalendar ->
+                                        viewModel.addTaskForDate(dateStr, title, isAllDay, hour, minute, saveToCalendar)
                                     },
                                     onEditTask = { item, title, isAllDay, hour, minute ->
                                         viewModel.updateTask(item, title, isAllDay, hour, minute)
                                     },
-                                    onSyncCalendarForDate = { viewModel.syncCalendarForDate(it) }
+                                    onSyncCalendarForDate = { viewModel.syncCalendarForDate(it) },
+                                    onRequestCalendarPermission = {
+                                        calendarLauncher.launch(calendarPermissions)
+                                    }
                                 )
                             }
                             MainDestination.ROASTS -> {
@@ -276,10 +295,11 @@ class MainActivity : ComponentActivity() {
                                     onSetSleepTime = { h, m -> viewModel.setSleepTime(h, m) },
                                     onSetWakeTime = { h, m -> viewModel.setWakeTime(h, m) },
                                     onToggleVibration = { viewModel.toggleVibration(it) },
+                                    onToggleConfirmDelete = { viewModel.toggleConfirmBeforeDelete(it) },
                                     onTestNotification = { viewModel.testPushNotificationNow() },
                                     onClearRoastsBook = { viewModel.clearRoastsCollectionBook() },
                                     onRequestCalendarPermission = {
-                                        calendarLauncher.launch(Manifest.permission.READ_CALENDAR)
+                                        calendarLauncher.launch(calendarPermissions)
                                     },
                                     onRequestNotificationPermission = {
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

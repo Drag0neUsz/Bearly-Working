@@ -39,6 +39,10 @@ class SavageSettingsManager(context: Context) {
         get() = prefs.getBoolean(KEY_VIBRATE, true)
         set(value) = prefs.edit().putBoolean(KEY_VIBRATE, value).apply()
 
+    var confirmBeforeDelete: Boolean
+        get() = prefs.getBoolean(KEY_CONFIRM_DELETE, true)
+        set(value) = prefs.edit().putBoolean(KEY_CONFIRM_DELETE, value).apply()
+
     var lastRoastTime: Long
         get() = prefs.getLong(KEY_LAST_ROAST, 0L)
         set(value) = prefs.edit().putLong(KEY_LAST_ROAST, value).apply()
@@ -52,6 +56,7 @@ class SavageSettingsManager(context: Context) {
         private const val KEY_QUIET_END = "quiet_end_hour"
         private const val KEY_QUIET_END_MIN = "quiet_end_min"
         private const val KEY_VIBRATE = "vibrate_enabled"
+        private const val KEY_CONFIRM_DELETE = "confirm_before_delete"
         private const val KEY_LAST_ROAST = "last_roast_timestamp"
     }
 }

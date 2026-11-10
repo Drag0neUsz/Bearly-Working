@@ -40,12 +40,13 @@ fun HomeScreen(
     onPokeBear: () -> Unit,
     onTriggerSecretRapidTap: () -> Unit,
     onSetFilter: (TaskFilter) -> Unit,
-    onAddTask: (title: String, isAllDay: Boolean, hour: Int, minute: Int) -> Unit,
+    onAddTask: (title: String, isAllDay: Boolean, hour: Int, minute: Int, saveToCalendar: Boolean) -> Unit,
     onEditTask: (ScheduleItem, String, Boolean, Int, Int) -> Unit = { _, _, _, _, _ -> },
     modifier: Modifier = Modifier
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<ScheduleItem?>(null) }
+    var itemPendingDelete by remember { mutableStateOf<ScheduleItem?>(null) }
 
     // Streak counter derived from real progress
     val completedDaysStreak = remember(uiState.allItems, uiState.completedCount) {
@@ -566,17 +567,36 @@ fun HomeScreen(
                         item = item,
                         onToggleCompleted = { onToggleCompleted(item) },
                         onEdit = { editingItem = item },
-                        onDelete = { onDeleteItem(item) }
+                        onDelete = {
+                            if (uiState.confirmBeforeDelete) {
+                                itemPendingDelete = item
+                            } else {
+                                onDeleteItem(item)
+                            }
+                        }
                     )
                 }
             }
         }
     }
 
+    // Delete Task Confirmation Popup
+    itemPendingDelete?.let { itemToDelete ->
+        DeleteTaskConfirmationDialog(
+            item = itemToDelete,
+            onConfirmDelete = {
+                onDeleteItem(itemToDelete)
+                itemPendingDelete = null
+            },
+            onDismiss = { itemPendingDelete = null }
+        )
+    }
+
     // Add Task Dialog
     if (showAddDialog) {
         var taskTitle by remember { mutableStateOf("") }
         var isAllDay by remember { mutableStateOf(false) }
+        var saveToCalendar by remember { mutableStateOf(false) }
         var selectedHour by remember { mutableIntStateOf(14) }
         var selectedMinute by remember { mutableIntStateOf(0) }
 
@@ -616,7 +636,20 @@ fun HomeScreen(
                             .testTag("input_task_title")
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    SaveToPhoneCalendarToggleRow(
+                        checked = saveToCalendar,
+                        onCheckedChange = { enabled ->
+                            saveToCalendar = enabled
+                            if (enabled && (!uiState.hasCalendarPermission || !uiState.hasWriteCalendarPermission)) {
+                                onRequestCalendarPermission()
+                            }
+                        },
+                        switchTestTag = "switch_save_to_calendar"
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -688,7 +721,7 @@ fun HomeScreen(
                 Tactile3DButton(
                     onClick = {
                         if (taskTitle.isNotBlank()) {
-                            onAddTask(taskTitle, isAllDay, selectedHour, selectedMinute)
+                            onAddTask(taskTitle, isAllDay, selectedHour, selectedMinute, saveToCalendar)
                             showAddDialog = false
                         }
                     },

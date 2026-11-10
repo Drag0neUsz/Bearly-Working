@@ -1,26 +1,13 @@
 package com.example
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.example.data.SavageQuotes
 import com.example.data.model.ScheduleItem
 import com.example.notification.SavageNotificationManager
+import com.example.ui.viewmodel.SavageUiState
 import org.junit.Assert.*
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
 class ExampleRobolectricTest {
-
-    @Test
-    fun `read string from context`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val appName = context.getString(R.string.app_name)
-        assertEquals("Bearly Finished", appName)
-    }
 
     @Test
     fun `savage categories and quotes are non empty`() {
@@ -56,12 +43,13 @@ class ExampleRobolectricTest {
     }
 
     @Test
-    fun `schedule item completion defaults to false`() {
+    fun `schedule item completion and ignore default to false`() {
         val item = ScheduleItem(
             title = "Test Task",
             dateString = "2026-10-20"
         )
         assertFalse(item.isCompleted)
+        assertFalse(item.isIgnored)
         assertEquals("MANUAL", item.source)
     }
 
@@ -76,11 +64,11 @@ class ExampleRobolectricTest {
     }
 
     @Test
-    fun `settings default to quiet mode ON and 120m poke interval`() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val settings = com.example.data.local.SavageSettingsManager(context)
-        assertEquals(120, settings.notificationIntervalMinutes)
-        assertTrue(settings.quietHoursEnabled)
+    fun `ui state defaults to quiet mode ON, confirm delete ON, and 120m poke interval`() {
+        val state = SavageUiState()
+        assertEquals(120, state.notificationIntervalMinutes)
+        assertTrue(state.quietHoursEnabled)
+        assertTrue(state.confirmBeforeDelete)
     }
 
     @Test

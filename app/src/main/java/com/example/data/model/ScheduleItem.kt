@@ -17,7 +17,8 @@ data class ScheduleItem(
     val calendarEventId: Long? = null,
     val calendarName: String? = null,
     val location: String? = null,
-    val dateString: String // Format: YYYY-MM-DD
+    val dateString: String, // Format: YYYY-MM-DD
+    val isIgnored: Boolean = false
 ) {
     companion object {
         const val SOURCE_CALENDAR = "CALENDAR"

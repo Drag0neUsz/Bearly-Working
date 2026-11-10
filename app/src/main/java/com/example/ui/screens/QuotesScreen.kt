@@ -548,61 +548,9 @@ private fun CategoryTilesView(
                     // Action Footer Row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (hasUnlocked) {
-                            Tactile3DBadge(
-                                containerColor = SoftGreenLight,
-                                borderColor = SoftGreen,
-                                bottomLipColor = SoftGreenShadow,
-                                shape = RoundedCornerShape(12.dp),
-                                lipHeight = 2.5.dp,
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Text(
-                                    text = "☒",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = SoftGreen
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "$unlockedInCat Roast${if (unlockedInCat == 1) "" else "s"} Found",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 11.sp
-                                    ),
-                                    color = SoftGreen
-                                )
-                            }
-                        } else {
-                            Tactile3DBadge(
-                                containerColor = Color(0xFFF3F4F6),
-                                borderColor = Color(0xFFD1D5DB),
-                                bottomLipColor = Color(0xFFD1D5DB),
-                                shape = RoundedCornerShape(12.dp),
-                                lipHeight = 2.5.dp,
-                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 5.dp)
-                            ) {
-                                Text(
-                                    text = "☒",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black,
-                                    color = Color(0xFF6B7280)
-                                )
-                                Spacer(modifier = Modifier.width(5.dp))
-                                Text(
-                                    text = "All $catTotal Locked",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Black,
-                                        fontSize = 11.sp
-                                    ),
-                                    color = Color(0xFF6B7280)
-                                )
-                            }
-                        }
-
                         Tactile3DButton(
                             onClick = { onSelectCategory(cat) },
                             containerColor = if (hasUnlocked) SoftGreen else Color(0xFFF3F4F6),

@@ -39,9 +39,10 @@ fun CalendarScreen(
     onSelectDate: (String) -> Unit,
     onToggleCompleted: (ScheduleItem) -> Unit,
     onDeleteItem: (ScheduleItem) -> Unit,
-    onAddTaskForDate: (dateString: String, title: String, isAllDay: Boolean, hour: Int, minute: Int) -> Unit,
+    onAddTaskForDate: (dateString: String, title: String, isAllDay: Boolean, hour: Int, minute: Int, saveToCalendar: Boolean) -> Unit,
     onEditTask: (ScheduleItem, String, Boolean, Int, Int) -> Unit,
     onSyncCalendarForDate: (String) -> Unit,
+    onRequestCalendarPermission: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val todayDateString = remember {
@@ -50,6 +51,7 @@ fun CalendarScreen(
 
     var showAddDialog by remember { mutableStateOf(false) }
     var editingItem by remember { mutableStateOf<ScheduleItem?>(null) }
+    var itemPendingDelete by remember { mutableStateOf<ScheduleItem?>(null) }
 
     val displayCalendar = remember {
         val cal = Calendar.getInstance()
@@ -781,7 +783,13 @@ fun CalendarScreen(
                             item = item,
                             onToggleCompleted = { onToggleCompleted(item) },
                             onEdit = { editingItem = item },
-                            onDelete = { onDeleteItem(item) }
+                            onDelete = {
+                                if (uiState.confirmBeforeDelete) {
+                                    itemPendingDelete = item
+                                } else {
+                                    onDeleteItem(item)
+                                }
+                            }
                         )
                     }
                 }
@@ -792,10 +800,23 @@ fun CalendarScreen(
         }
     }
 
+    // Delete Task Confirmation Popup
+    itemPendingDelete?.let { itemToDelete ->
+        DeleteTaskConfirmationDialog(
+            item = itemToDelete,
+            onConfirmDelete = {
+                onDeleteItem(itemToDelete)
+                itemPendingDelete = null
+            },
+            onDismiss = { itemPendingDelete = null }
+        )
+    }
+
     // Add Task Dialog for Selected Date
     if (showAddDialog) {
         var taskTitle by remember { mutableStateOf("") }
         var isAllDay by remember { mutableStateOf(false) }
+        var saveToCalendar by remember { mutableStateOf(false) }
         var selectedHour by remember { mutableIntStateOf(12) }
         var selectedMinute by remember { mutableIntStateOf(0) }
 
@@ -835,7 +856,20 @@ fun CalendarScreen(
                             .testTag("input_calendar_task_title")
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    SaveToPhoneCalendarToggleRow(
+                        checked = saveToCalendar,
+                        onCheckedChange = { enabled ->
+                            saveToCalendar = enabled
+                            if (enabled && (!uiState.hasCalendarPermission || !uiState.hasWriteCalendarPermission)) {
+                                onRequestCalendarPermission()
+                            }
+                        },
+                        switchTestTag = "switch_save_to_calendar_date"
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -904,7 +938,7 @@ fun CalendarScreen(
                 Tactile3DButton(
                     onClick = {
                         if (taskTitle.isNotBlank()) {
-                            onAddTaskForDate(selectedDate, taskTitle, isAllDay, selectedHour, selectedMinute)
+                            onAddTaskForDate(selectedDate, taskTitle, isAllDay, selectedHour, selectedMinute, saveToCalendar)
                             showAddDialog = false
                         }
                     },

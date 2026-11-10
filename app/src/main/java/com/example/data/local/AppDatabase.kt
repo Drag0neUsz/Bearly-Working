@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.data.model.ScheduleItem
 import com.example.data.model.UnlockedRoast
 
-@Database(entities = [ScheduleItem::class, UnlockedRoast::class], version = 2, exportSchema = false)
+@Database(entities = [ScheduleItem::class, UnlockedRoast::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun scheduleDao(): ScheduleDao
 

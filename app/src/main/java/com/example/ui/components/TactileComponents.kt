@@ -11,6 +11,14 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.DeleteOutline
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -20,9 +28,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.data.model.ScheduleItem
 import com.example.ui.theme.*
 
 /**
@@ -269,4 +281,167 @@ fun TactileToggleSwitch(
                 .background(Color.White, shape = CircleShape)
         )
     }
+}
+
+/**
+ * Tactile toggle row inside the task creation dialog for also saving the task to the phone's calendar.
+ */
+@Composable
+fun SaveToPhoneCalendarToggleRow(
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    switchTestTag: String = "switch_save_to_calendar",
+    modifier: Modifier = Modifier
+) {
+    val containerBg = if (checked) SoftBlueLight else Color(0xFFF8FAFC)
+    val borderColor = if (checked) SoftBlueBorder else SoftBorder
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(containerBg, shape = RoundedCornerShape(14.dp))
+            .border(width = 1.5.dp, color = borderColor, shape = RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(14.dp))
+            .clickable { onCheckedChange(!checked) }
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        color = if (checked) SoftBlue else Color(0xFFE2E8F0),
+                        shape = RoundedCornerShape(10.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = if (checked) Color.White else SoftTextSecondary,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = "SAVE TO PHONE CALENDAR",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Black,
+                        fontSize = 12.sp
+                    ),
+                    color = SoftTextPrimary
+                )
+                Text(
+                    text = "Also adds this event to your device calendar",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 10.sp
+                    ),
+                    color = SoftTextSecondary
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        TactileToggleSwitch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = Modifier.testTag(switchTestTag)
+        )
+    }
+}
+
+/**
+ * Confirmation popup before deleting a task.
+ */
+@Composable
+fun DeleteTaskConfirmationDialog(
+    item: ScheduleItem,
+    onConfirmDelete: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("dialog_confirm_delete_task"),
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .background(SoftRedLight, shape = RoundedCornerShape(10.dp))
+                        .border(width = 1.5.dp, color = SoftRedBorder, shape = RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteOutline,
+                        contentDescription = null,
+                        tint = SoftRed,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "DELETE COMMITMENT?",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
+                    color = SoftRed
+                )
+            }
+        },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Are you sure you want to delete \"${item.title}\"?",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = SoftTextPrimary
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = if (item.source == ScheduleItem.SOURCE_CALENDAR) {
+                        "This calendar event will be hidden from your schedule and won't reappear on future syncs."
+                    } else if (item.calendarEventId != null) {
+                        "This commitment will be removed from your schedule and your phone's calendar."
+                    } else {
+                        "The bear knows when you back out of a commitment. You can disable this prompt in Settings."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = SoftTextSecondary
+                )
+            }
+        },
+        confirmButton = {
+            Tactile3DButton(
+                onClick = onConfirmDelete,
+                containerColor = SoftRed,
+                bottomLipColor = SoftRedShadow,
+                borderColor = SoftRedShadow,
+                cornerRadius = 14.dp,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+                modifier = Modifier.testTag("btn_confirm_delete_task")
+            ) {
+                Text(
+                    text = "DELETE TASK",
+                    color = Color.White,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 12.sp
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.testTag("btn_cancel_delete_task")
+            ) {
+                Text("CANCEL", color = SoftTextSecondary, fontWeight = FontWeight.Black)
+            }
+        },
+        containerColor = SoftSurfaceWhite,
+        shape = RoundedCornerShape(24.dp)
+    )
 }

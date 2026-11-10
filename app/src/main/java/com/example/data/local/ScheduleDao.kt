@@ -8,13 +8,13 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ScheduleDao {
 
-    @Query("SELECT * FROM schedule_items WHERE dateString = :dateString ORDER BY isAllDay DESC, startTime ASC")
+    @Query("SELECT * FROM schedule_items WHERE dateString = :dateString AND isIgnored = 0 ORDER BY isAllDay DESC, startTime ASC")
     fun getItemsForDateFlow(dateString: String): Flow<List<ScheduleItem>>
 
-    @Query("SELECT * FROM schedule_items ORDER BY isAllDay DESC, startTime ASC")
+    @Query("SELECT * FROM schedule_items WHERE isIgnored = 0 ORDER BY isAllDay DESC, startTime ASC")
     fun getAllItemsFlow(): Flow<List<ScheduleItem>>
 
-    @Query("SELECT * FROM schedule_items WHERE dateString = :dateString ORDER BY isAllDay DESC, startTime ASC")
+    @Query("SELECT * FROM schedule_items WHERE dateString = :dateString AND isIgnored = 0 ORDER BY isAllDay DESC, startTime ASC")
     suspend fun getItemsForDate(dateString: String): List<ScheduleItem>
 
     @Query("SELECT * FROM schedule_items WHERE calendarEventId = :calendarEventId AND dateString = :dateString LIMIT 1")
@@ -38,10 +38,10 @@ interface ScheduleDao {
     @Query("DELETE FROM schedule_items WHERE id = :itemId")
     suspend fun deleteItemById(itemId: Long)
 
-    @Query("SELECT COUNT(*) FROM schedule_items WHERE dateString = :dateString AND isCompleted = 0")
+    @Query("SELECT COUNT(*) FROM schedule_items WHERE dateString = :dateString AND isCompleted = 0 AND isIgnored = 0")
     suspend fun getUncompletedCountForDate(dateString: String): Int
 
-    @Query("SELECT COUNT(*) FROM schedule_items WHERE dateString = :dateString")
+    @Query("SELECT COUNT(*) FROM schedule_items WHERE dateString = :dateString AND isIgnored = 0")
     suspend fun getTotalCountForDate(dateString: String): Int
 
     // Unlocked Roasts (Completion Book)

@@ -1,6 +1,11 @@
 package com.example.ui.viewmodel
 
+import android.Manifest
 import android.app.Application
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.SavageQuotes
@@ -25,8 +30,9 @@ data class SavageUiState(
     val filter: TaskFilter = TaskFilter.ALL,
     val bearQuote: String = "Tap my head. Let's see what promises you've broken today.",
     val bearQuoteCategory: String = "READY TO ROAST",
-    val hasCalendarPermission: Boolean = false,
-    val hasNotificationPermission: Boolean = false,
+    val hasCalendarPermission: Boolean = true,
+    val hasWriteCalendarPermission: Boolean = true,
+    val hasNotificationPermission: Boolean = true,
     val isAutoSyncing: Boolean = false,
     val notificationIntervalMinutes: Int = 120,
     val notificationsEnabled: Boolean = true,
@@ -36,6 +42,7 @@ data class SavageUiState(
     val quietEndHour: Int = 7,
     val quietEndMinute: Int = 0,
     val vibrateEnabled: Boolean = true,
+    val confirmBeforeDelete: Boolean = true,
     val unlockedQuotes: Set<String> = emptySet(),
     val statusMessage: String? = null
 ) {
@@ -67,9 +74,23 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
     private val settings = SavageSettingsManager(application)
     private val notificationManager = SavageNotificationManager(application)
 
+    private fun checkInitialNotificationPermission(app: Application): Boolean {
+        val runtimeGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                app,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+        return runtimeGranted && NotificationManagerCompat.from(app).areNotificationsEnabled()
+    }
+
     private val _uiState = MutableStateFlow(
         SavageUiState(
             hasCalendarPermission = repository.hasCalendarPermission(),
+            hasWriteCalendarPermission = repository.hasWriteCalendarPermission(),
+            hasNotificationPermission = checkInitialNotificationPermission(application),
             selectedCalendarDate = repository.getTodayDateString(),
             notificationIntervalMinutes = settings.notificationIntervalMinutes,
             notificationsEnabled = settings.notificationsEnabled,
@@ -78,7 +99,8 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
             quietStartMinute = settings.quietStartMinute,
             quietEndHour = settings.quietEndHour,
             quietEndMinute = settings.quietEndMinute,
-            vibrateEnabled = settings.vibrateEnabled
+            vibrateEnabled = settings.vibrateEnabled,
+            confirmBeforeDelete = settings.confirmBeforeDelete
         )
     )
     val uiState: StateFlow<SavageUiState> = _uiState.asStateFlow()
@@ -128,6 +150,7 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update {
             it.copy(
                 hasCalendarPermission = calendarGranted,
+                hasWriteCalendarPermission = repository.hasWriteCalendarPermission(),
                 hasNotificationPermission = notificationGranted
             )
         }
@@ -232,7 +255,13 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun addQuickTask(title: String, isAllDay: Boolean = false, hour: Int = 12, minute: Int = 0) {
+    fun addQuickTask(
+        title: String,
+        isAllDay: Boolean = false,
+        hour: Int = 12,
+        minute: Int = 0,
+        saveToCalendar: Boolean = false
+    ) {
         if (title.isBlank()) return
         viewModelScope.launch {
             val cal = Calendar.getInstance()
@@ -249,7 +278,15 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
                 source = ScheduleItem.SOURCE_MANUAL,
                 dateString = repository.getTodayDateString()
             )
-            repository.addItem(item)
+            val saved = repository.addItem(item, saveToCalendar)
+            if (saveToCalendar) {
+                val msg = if (saved.calendarEventId != null) {
+                    "Added commitment & saved to phone calendar!"
+                } else {
+                    "Added commitment locally (grant calendar permission to sync)."
+                }
+                _uiState.update { it.copy(statusMessage = msg) }
+            }
         }
     }
 
@@ -257,7 +294,14 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
         _uiState.update { it.copy(selectedCalendarDate = dateString) }
     }
 
-    fun addTaskForDate(dateString: String, title: String, isAllDay: Boolean = false, hour: Int = 12, minute: Int = 0) {
+    fun addTaskForDate(
+        dateString: String,
+        title: String,
+        isAllDay: Boolean = false,
+        hour: Int = 12,
+        minute: Int = 0,
+        saveToCalendar: Boolean = false
+    ) {
         if (title.isBlank()) return
         viewModelScope.launch {
             val cal = Calendar.getInstance()
@@ -285,7 +329,15 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
                 source = ScheduleItem.SOURCE_MANUAL,
                 dateString = dateString
             )
-            repository.addItem(item)
+            val saved = repository.addItem(item, saveToCalendar)
+            if (saveToCalendar) {
+                val msg = if (saved.calendarEventId != null) {
+                    "Added commitment & saved to phone calendar!"
+                } else {
+                    "Added commitment locally (grant calendar permission to sync)."
+                }
+                _uiState.update { it.copy(statusMessage = msg) }
+            }
         }
     }
 
@@ -371,6 +423,11 @@ class SavageViewModel(application: Application) : AndroidViewModel(application) 
     fun toggleVibration(enabled: Boolean) {
         settings.vibrateEnabled = enabled
         _uiState.update { it.copy(vibrateEnabled = enabled) }
+    }
+
+    fun toggleConfirmBeforeDelete(enabled: Boolean) {
+        settings.confirmBeforeDelete = enabled
+        _uiState.update { it.copy(confirmBeforeDelete = enabled) }
     }
 
     /**

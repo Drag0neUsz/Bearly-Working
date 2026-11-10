@@ -48,21 +48,59 @@ class ScheduleRepository(
         scheduleDao.updateCompletion(item.id, newStatus)
     }
 
-    suspend fun addItem(item: ScheduleItem): Long = withContext(Dispatchers.IO) {
-        scheduleDao.insertItem(item)
+    suspend fun addItem(item: ScheduleItem, saveToCalendar: Boolean = false): ScheduleItem = withContext(Dispatchers.IO) {
+        val itemToInsert = if (saveToCalendar) {
+            val calendarResult = calendarHelper.insertEventToDeviceCalendar(
+                title = item.title,
+                description = item.description,
+                startTime = item.startTime,
+                endTime = item.endTime,
+                isAllDay = item.isAllDay
+            )
+            if (calendarResult != null) {
+                item.copy(
+                    calendarEventId = calendarResult.first,
+                    calendarName = calendarResult.second
+                )
+            } else {
+                item
+            }
+        } else {
+            item
+        }
+        val rowId = scheduleDao.insertItem(itemToInsert)
+        itemToInsert.copy(id = rowId)
     }
 
     suspend fun updateItem(item: ScheduleItem) = withContext(Dispatchers.IO) {
+        item.calendarEventId?.let { eventId ->
+            calendarHelper.updateDeviceCalendarEvent(
+                eventId = eventId,
+                title = item.title,
+                startTime = item.startTime,
+                endTime = item.endTime,
+                isAllDay = item.isAllDay
+            )
+        }
         scheduleDao.updateItem(item)
     }
 
     suspend fun deleteItem(item: ScheduleItem) = withContext(Dispatchers.IO) {
-        scheduleDao.deleteItem(item)
+        if (item.source == ScheduleItem.SOURCE_CALENDAR) {
+            // Keep a tombstone in Room so the event won't re-appear on next calendar sync
+            scheduleDao.updateItem(item.copy(isIgnored = true))
+        } else {
+            // If this manual task was pushed to the phone's calendar, remove it there too
+            item.calendarEventId?.let { eventId ->
+                calendarHelper.deleteDeviceCalendarEvent(eventId)
+            }
+            scheduleDao.deleteItem(item)
+        }
     }
 
     /**
      * Pull events from user's Android calendar and merge with local database.
-     * Preserves completed states if an event was already synced.
+     * Preserves completed and ignored states if an event was already synced.
      */
     suspend fun syncCalendarForDate(calendar: Calendar): Int = withContext(Dispatchers.IO) {
         val events = calendarHelper.fetchEventsForDate(calendar)
@@ -76,7 +114,7 @@ class ScheduleRepository(
             if (existing == null) {
                 scheduleDao.insertItem(event)
                 newSyncedCount++
-            } else {
+            } else if (!existing.isIgnored) {
                 val updated = existing.copy(
                     title = event.title,
                     description = event.description,
@@ -100,6 +138,8 @@ class ScheduleRepository(
     }
 
     fun hasCalendarPermission(): Boolean = calendarHelper.hasCalendarPermission()
+
+    fun hasWriteCalendarPermission(): Boolean = calendarHelper.hasWriteCalendarPermission()
 
     // Completion Book / Unlocked Roasts
     fun getUnlockedRoastsFlow(): Flow<List<UnlockedRoast>> = scheduleDao.getAllUnlockedRoastsFlow()

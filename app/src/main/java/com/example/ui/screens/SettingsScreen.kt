@@ -36,6 +36,7 @@ fun SettingsScreen(
     onSetSleepTime: (Int, Int) -> Unit,
     onSetWakeTime: (Int, Int) -> Unit,
     onToggleVibration: (Boolean) -> Unit,
+    onToggleConfirmDelete: (Boolean) -> Unit = {},
     onTestNotification: () -> Unit,
     onClearRoastsBook: () -> Unit,
     onRequestCalendarPermission: () -> Unit,
@@ -670,6 +671,75 @@ fun SettingsScreen(
                         TactileToggleSwitch(
                             checked = uiState.vibrateEnabled,
                             onCheckedChange = onToggleVibration
+                        )
+                    }
+                }
+
+                // =============================================================
+                // CARD 4B: CONFIRM TASK DELETION
+                // =============================================================
+                Tactile3DCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("card_confirm_delete"),
+                    containerColor = SoftSurfaceWhite,
+                    borderColor = SoftBorder,
+                    bottomLipColor = SoftBorder,
+                    cornerRadius = 24.dp,
+                    lipHeight = 3.dp,
+                    contentPadding = PaddingValues(18.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .background(SoftRedLight, shape = RoundedCornerShape(14.dp))
+                                    .border(width = 2.dp, color = SoftRedBorder, shape = RoundedCornerShape(14.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "☒",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = SoftRed
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "CONFIRM TASK DELETION",
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.5.sp,
+                                        fontSize = 15.sp
+                                    ),
+                                    color = SoftTextPrimary
+                                )
+                                Text(
+                                    text = "Show a confirmation popup before deleting any task",
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = SoftTextMuted
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        TactileToggleSwitch(
+                            checked = uiState.confirmBeforeDelete,
+                            onCheckedChange = onToggleConfirmDelete,
+                            modifier = Modifier.testTag("switch_confirm_delete")
                         )
                     }
                 }
